@@ -1,0 +1,15 @@
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- Add more domains for cleartext traffic if needed -->
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">resume.bitlabs.in</domain>
+        <domain includeSubdomains="true">192.168.86.101</domain>
+        <!-- Add more domains for HTTPS traffic if needed -->
+        <trust-anchors>
+            <certificates src="@raw/certificate"/> 
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

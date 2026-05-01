@@ -1,0 +1,61 @@
+diff --git a/node_modules/react-native-screens/android/CMakeLists.txt b/node_modules/react-native-screens/android/CMakeLists.txt
+index 45384f8..86ec079 100644
+--- a/node_modules/react-native-screens/android/CMakeLists.txt
++++ b/node_modules/react-native-screens/android/CMakeLists.txt
+@@ -28,7 +28,6 @@ set_target_properties(rnscreens PROPERTIES
+     CXX_STANDARD_REQUIRED ON
+     CXX_EXTENSIONS OFF
+     POSITION_INDEPENDENT_CODE ON
+-    LINK_FLAGS "-Wl,-z,max-page-size=16384"
+ )
+ 
+ target_compile_definitions(
+diff --git a/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt b/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt
+index f92004f..1b26dac 100644
+--- a/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt
++++ b/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt
+@@ -30,11 +30,6 @@ add_library(
+   ${LIB_CODEGEN_SRCS}
+ )
+ 
+-# Add 16 KB page size alignment
+-set_target_properties(${LIB_TARGET_NAME} PROPERTIES
+-    LINK_FLAGS "-Wl,-z,max-page-size=16384"
+-)
+-
+ target_include_directories(
+   ${LIB_TARGET_NAME}
+   PUBLIC
+diff --git a/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/PointerEventsBoxNoneImpl.kt b/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/PointerEventsBoxNoneImpl.kt
+index 08ce7d4..1f15aee 100644
+--- a/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/PointerEventsBoxNoneImpl.kt
++++ b/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/PointerEventsBoxNoneImpl.kt
+@@ -7,5 +7,5 @@ internal class PointerEventsBoxNoneImpl : ReactPointerEventsView {
+     // We set pointer events to BOX_NONE, because we don't want the ScreensCoordinatorLayout
+     // to be target of react gestures and effectively prevent interaction with screens
+     // underneath the current screen (useful in `modal` & `formSheet` presentation).
+-    override val pointerEvents: PointerEvents = PointerEvents.BOX_NONE
++    override fun getPointerEvents(): PointerEvents = PointerEvents.BOX_NONE
+ }
+diff --git a/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/bottomsheet/DimmingViewPointerEvents.kt b/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/bottomsheet/DimmingViewPointerEvents.kt
+index 064c881..044be7f 100644
+--- a/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/bottomsheet/DimmingViewPointerEvents.kt
++++ b/node_modules/react-native-screens/android/src/versioned/pointerevents/latest/com/swmansion/rnscreens/bottomsheet/DimmingViewPointerEvents.kt
+@@ -6,13 +6,13 @@ import com.facebook.react.uimanager.ReactPointerEventsView
+ internal class DimmingViewPointerEventsImpl(
+     val dimmingView: DimmingView,
+ ) : ReactPointerEventsView {
+-    override val pointerEvents: PointerEvents
+-        get() = if (dimmingView.blockGestures) PointerEvents.AUTO else PointerEvents.NONE
++    override fun getPointerEvents(): PointerEvents =
++        if (dimmingView.blockGestures) PointerEvents.AUTO else PointerEvents.NONE
+ }
+ 
+ internal class DimmingViewPointerEventsProxy(
+     var pointerEventsImpl: DimmingViewPointerEventsImpl?,
+ ) : ReactPointerEventsView {
+-    override val pointerEvents: PointerEvents
+-        get() = pointerEventsImpl?.pointerEvents ?: PointerEvents.NONE
++    override fun getPointerEvents(): PointerEvents =
++        pointerEventsImpl?.getPointerEvents() ?: PointerEvents.NONE
+ }
