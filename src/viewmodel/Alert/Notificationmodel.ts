@@ -32,9 +32,9 @@ export const useJobAlerts = () => {
 
     try {
       setLoading(true);
-      setCurrentPage(1);
+      setCurrentPage(0);
       setHasMore(true);
-      const alerts = await fetchJobAlerts(userId, userToken, 1, 15);
+      const alerts = await fetchJobAlerts(userId, userToken, 0, 15);
       console.log("Fetched alerts from server:", alerts);
       setJobAlerts(alerts);
       setHasMore(alerts.length === 15); // If we got exactly 15, there might be more

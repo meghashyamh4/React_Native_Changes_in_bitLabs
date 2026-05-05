@@ -602,7 +602,7 @@ const HackathonScreen = () => {
                 <Icon name="arrow-back" size={24} color="#000" />
               </TouchableOpacity>
             )}
-            <Text style={styles.pageTitle}>Innovation Arena</Text>
+            <Text style={styles.pageTitle}>Hackathons</Text>
             <View style={styles.backButtonPlaceholder} />
           </View>
         </View>

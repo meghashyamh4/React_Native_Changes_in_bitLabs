@@ -159,7 +159,7 @@ const LandingPage = () => {
                 {activeButton === 'signup' ? (
                   <LinearGradient
                     colors={['#F97316', '#FAA729']}
-                    start={{ x: 0, y: 0 }}
+                                        start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.gradientBackground}>
                     <Text style={[styles.buttonText, styles.activeButtonText]}>Sign Up</Text>

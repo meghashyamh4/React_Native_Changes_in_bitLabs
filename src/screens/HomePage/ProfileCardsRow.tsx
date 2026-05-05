@@ -430,7 +430,7 @@ const ProfileCardsRow: React.FC = () => {
       {/* Arena Card - White */}
       <ArenaCard
         characterImg={require('../../assests/Images/Asknewton/hackathon.png')}
-        onEnterArena={() => navigation.navigate('BottomTab', { screen: 'Arena' })}
+        onEnterArena={() => navigation.navigate('BottomTab' as any, { screen: 'Hackathon' } as any)}
         backgroundColor={cardColors[1].bg}
         borderColor={cardColors[1].border}
       />

@@ -30,7 +30,20 @@ export const fetchJobAlerts = async (
     const alerts = Array.isArray(response.data) ? response.data : [];
         console.log("notification response page", page, response.data)
 
-    return alerts;
+    // Sort notifications by most recent first (based on createdTime)
+    const sortedAlerts = alerts.sort((a, b) => {
+      // Convert createdTime arrays to timestamps for comparison
+      const dateA = a.createdTime && Array.isArray(a.createdTime) 
+        ? new Date(a.createdTime[0], a.createdTime[1] - 1, a.createdTime[2]).getTime()
+        : 0;
+      const dateB = b.createdTime && Array.isArray(b.createdTime)
+        ? new Date(b.createdTime[0], b.createdTime[1] - 1, b.createdTime[2]).getTime()
+        : 0;
+      
+      return dateB - dateA; // Descending order (most recent first)
+    });
+
+    return sortedAlerts;
   } catch (error) {
     console.error('❌ ERROR fetching notifications:', error);
     return [];
