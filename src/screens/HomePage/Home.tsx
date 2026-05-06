@@ -602,16 +602,38 @@ function Dashboard() {
             </>
           ) : (
             <>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={[styles.textBelowNavbar, isTablet && styles.tabletTextBelowNavBar]}>Hello, {userName
-                  ? userName.charAt(0).toUpperCase() + userName.slice(1)
-                  : 'Guest'}
-                </Text>
-                {verified && <Icon5 name="verified" size={25} color="#F46F16" style={{ marginLeft: 4, marginTop: screenHeight * 0.015, }} />}
+            <View style={{ display: 'flex', flexDirection: 'row', gap: 34,  alignItems: 'center', }}>
+                <View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={[styles.textBelowNavbar, isTablet && styles.tabletTextBelowNavBar]}>Hello, {userName
+                          ? userName.charAt(0).toUpperCase() + userName.slice(1)
+                          : 'Guest'}
+                        </Text>
+                        {verified && <Icon5 name="verified" size={25} color="#F46F16" style={{ marginLeft: 4, marginTop: screenHeight * 0.015, }} />}
+                      </View>
+                      <Text style={[styles.textBelowNavbar1, isTablet && { fontSize: wp('2%'), }]}>
+                        {setmsg ? 'Welcome' : 'Welcome back'} {/* Conditional rendering */}
+                      </Text>
+                  </View>
+
+                   
+                  <TouchableOpacity 
+                    style={{ flex: 1 ,padding: 10, borderRadius: 8, marginRight: 16,alignItems:'center',justifyContent:'center'}}
+                    onPress={() => navigation.navigate('LMSMainPage')}
+                  >
+                    <LinearGradient
+                          colors={["#FBBB5C", "#E66A0E"]}
+                          start={{ x: 1, y: 0 }}
+                          end={{ x: 0, y: 1 }}
+                          useAngle={true}
+                          angle={225}
+                          style={styles.cardGradient}
+                        >
+                    <Text style={{ color: 'white' }}>Recent</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                  
               </View>
-              <Text style={[styles.textBelowNavbar1, isTablet && { fontSize: wp('2%'), }]}>
-                {setmsg ? 'Welcome' : 'Welcome back'} {/* Conditional rendering */}
-              </Text>
 
               {/* Streak Quiz integration */}
               {/* {streakData && !streakData.attemptedToday && !quizDone && (
@@ -824,6 +846,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
 
     marginLeft: 20, // Space between image and text
+  },
+  cardGradient: {
+    flex: 1,
+    height: 20,
+    width: 100,
+    padding: 10,
+    borderRadius: 8,
+    marginRight: 16,
+    alignItems:'center',
+    justifyContent:'center'
   },
 });
 export default Dashboard;

@@ -43,6 +43,8 @@ import InterviewPrepPageRN from '../screens/InterviewPreparation/InterviewPrepPa
 import Dashboard from '../screens/HomePage/Home';
 import FeedbackFormsListScreen from '../screens/FeedbackForms/FeedbackFormsListScreen';
 import FeedbackFormDetailScreen from '../screens/FeedbackForms/FeedbackFormDetailScreen';
+import LMSMainPage from '../screens/LMsPage/LMSMainPage';
+import ScormPlayer from '../screens/LMsPage/ScromPlayer';
 
 import { toastConfig } from '@components/Toast/toast_config';
 import AskNewtonButton from '@components/FixedButtons/AskNewtonButton';
@@ -499,6 +501,34 @@ const Appnavigator: React.FC<AppnavigatorProps> = ({ onLoadingChange }) => {
               name="FeedbackFormDetails"
               component={FeedbackFormDetailScreen}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="LMSMainPage"
+              component={LMSMainPage}
+              options={{
+                title: 'LMS Main Page',
+                headerStyle: {
+                  backgroundColor: '#f8f9fa',
+                },
+                headerTintColor: '#333',
+                headerTitleStyle: {
+                  fontWeight: 'bold',
+                },
+              }}
+            />
+            <Stack.Screen
+              name="ScormPlayer"
+              component={ScormPlayer}
+              options={{
+                title: 'SCORM Player',
+                headerStyle: {
+                  backgroundColor: '#f8f9fa',
+                },
+                headerTintColor: '#333',
+                headerTitleStyle: {
+                  fontWeight: 'bold',
+                },
+              }}
             />
           </>
         )}
