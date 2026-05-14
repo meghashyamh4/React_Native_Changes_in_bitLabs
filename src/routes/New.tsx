@@ -507,28 +507,34 @@ const Appnavigator: React.FC<AppnavigatorProps> = ({ onLoadingChange }) => {
               component={LMSMainPage}
               options={{
                 title: 'LMS Main Page',
+                headerTransparent: true,
+                headerTitleAlign: 'center',
                 headerStyle: {
-                  backgroundColor: '#f8f9fa',
+                  backgroundColor: 'transparent',
                 },
                 headerTintColor: '#333',
                 headerTitleStyle: {
                   fontWeight: 'bold',
+                  fontSize: 20,
+                  color: '#1A1A1A',
                 },
               }}
             />
             <Stack.Screen
               name="ScormPlayer"
               component={ScormPlayer}
-              options={{
-                title: 'SCORM Player',
+              options={({ route }: any) => ({
+                title: route.params?.courseName || 'SCORM Player',
+                headerTitleAlign: 'center',
                 headerStyle: {
                   backgroundColor: '#f8f9fa',
                 },
                 headerTintColor: '#333',
                 headerTitleStyle: {
                   fontWeight: 'bold',
+                  fontSize: 18,
                 },
-              }}
+              })}
             />
           </>
         )}

@@ -618,7 +618,7 @@ function Dashboard() {
 
                    
                   <TouchableOpacity 
-                    style={{ flex: 1 ,padding: 10, borderRadius: 8, marginRight: 16,alignItems:'center',justifyContent:'center'}}
+                    style={{ flex: 1 ,padding: 10, borderRadius: 8, marginRight: 16,alignItems:'center',justifyContent:'center',height:55}}
                     onPress={() => navigation.navigate('LMSMainPage')}
                   >
                     <LinearGradient
@@ -629,7 +629,7 @@ function Dashboard() {
                           angle={225}
                           style={styles.cardGradient}
                         >
-                    <Text style={{ color: 'white' }}>Recent</Text>
+                    <Text style={{ color: 'white' ,height:20}}>LMS</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                   
