@@ -32,9 +32,9 @@ class ProgressService {
     }
   }
 
-  resetCourseProgress(applicantId: string, courseId: string) {
-    return apiClient.delete(`/api/progress/reset/${applicantId}/${courseId}`);
-  }
+  // resetCourseProgress(applicantId: string, courseId: string) {
+  //   return apiClient.delete(`/api/progress/reset/${applicantId}/${courseId}`);
+  // }
 }
 
 export default new ProgressService();

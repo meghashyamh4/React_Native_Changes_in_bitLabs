@@ -128,7 +128,6 @@ const LMSMainPage = () => {
 
   const handleCoursePress = (courseName: string, courseId: number, courseProgress: number) => {
     navigation.navigate('ScormPlayer', {
-      url: 'https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/introductiontowebapp_topic1/story.html',
       progress: courseProgress,
       courseId: courseId,
       courseName: courseName

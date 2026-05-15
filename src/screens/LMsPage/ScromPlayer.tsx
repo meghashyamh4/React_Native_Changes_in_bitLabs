@@ -55,7 +55,7 @@ const ScormPlayer = () => {
   const { userId } = useAuth();
   const [isInteracted, setIsInteracted] = React.useState(false);
   const webViewRef = useRef<WebView>(null);
-  const { url: initialUrl, progress: initialProgress, courseId, courseName } = route.params as { url: string; progress: number; courseId: number; courseName: string };
+  const { url: initialUrl, progress: initialProgress, courseId, courseName } = route.params as { url?: string; progress: number; courseId: number; courseName: string };
   const [currentProgress, setCurrentProgress] = useState(initialProgress);
   const [totalCount, setTotalCount] = useState(0);
   const [visitedCount, setVisitedCount] = useState(0);
@@ -67,6 +67,7 @@ const ScormPlayer = () => {
 
   // Topic-level progress state
   const [topicProgress, setTopicProgress] = useState<Record<number, number>>({});
+  const [scormData, setScormData] = useState<Record<string, string>>({});
   const [courseProgressId, setCourseProgressId] = useState<number | null>(null);
   const [progressLoaded, setProgressLoaded] = useState(false);
   const selectedTopicRef = useRef(0);
@@ -102,6 +103,8 @@ const ScormPlayer = () => {
   const loadInitialProgress = useCallback(async () => {
     try {
       const idx = selectedTopicRef.current;
+
+      // 1. Load basic progress (visited/total)
       const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
       const rawData = await AsyncStorage.getItem(progressKey);
 
@@ -109,8 +112,24 @@ const ScormPlayer = () => {
         const data = JSON.parse(rawData);
         const visited = typeof data.visited === "number" ? data.visited : data.visited?.length || 0;
         const total = data.total || visited || 1;
-
         updateProgressState(visited, total);
+      }
+
+      // 2. Load detailed SCORM data for resumption
+      const scormKey = `scorm_data_${courseId}_topic_${idx}`;
+      const savedScormData = await AsyncStorage.getItem(scormKey);
+      if (savedScormData) {
+        const parsedData = JSON.parse(savedScormData);
+        setScormData(parsedData);
+
+        // Inject into WebView if it's already loaded
+        const injectScript = `
+          if (window.API) {
+            window.scormData = ${JSON.stringify(parsedData)};
+            console.log('Restored SCORM data:', window.scormData);
+          }
+        `;
+        webViewRef.current?.injectJavaScript(injectScript);
       }
     } catch (e) {
       console.log("Error parsing progress from AsyncStorage", e);
@@ -169,13 +188,24 @@ const ScormPlayer = () => {
           });
           setTopicProgress(progressMap);
 
-          // Auto-select the first incomplete topic
-          const firstIncomplete = (Array.isArray(topics) ? topics : [])
-            .sort((a: any, b: any) => a.topicIndex - b.topicIndex)
-            .find((t: any) => (t.topicProgress || 0) < 100);
-          if (firstIncomplete) {
-            setSelectedTopicIndex(firstIncomplete.topicIndex);
+          // Auto-select the first incomplete or unlocked topic
+          const topicsList = Array.isArray(topics) ? topics : [];
+          const sortedTopics = topicsList.sort((a: any, b: any) => a.topicIndex - b.topicIndex);
+
+          let nextTopicIndex = 0;
+          for (let i = 0; i < courseContent.length; i++) {
+            const prog = progressMap[i] || 0;
+            const isPrevComplete = i === 0 || (progressMap[i - 1] || 0) >= 100;
+
+            if (prog < 100 && isPrevComplete) {
+              nextTopicIndex = i;
+              break;
+            }
           }
+
+          console.log("🎯 Auto-navigating to topic index:", nextTopicIndex);
+          setSelectedTopicIndex(nextTopicIndex);
+          setCurrentProgress(progressMap[nextTopicIndex] || 0);
         }
       } catch (err) {
         console.error('Error loading topic progress:', err);
@@ -281,6 +311,10 @@ const ScormPlayer = () => {
         LMSInitialize: function() {
           isInitialized = true;
           console.log('SCORM API Initialized');
+          // Use restored data if available
+          if (window.scormData) {
+            scormData = Object.assign(scormData, window.scormData);
+          }
           return "true";
         },
 
@@ -393,6 +427,7 @@ const ScormPlayer = () => {
       else if (data.type === "progress") {
         const progress = Math.round(data.value || 0);
         setCurrentProgress(progress);
+        console.log("progress", progress);
       }
 
       // Original SCORM messages
@@ -400,6 +435,14 @@ const ScormPlayer = () => {
         switch (data.type) {
           case 'setValue':
             console.log('SCORM Data Set:', data.key, data.value);
+            // Persist SCORM data to AsyncStorage
+            const idx = selectedTopicRef.current;
+            const scormKey = `scorm_data_${courseId}_topic_${idx}`;
+            setScormData(prev => {
+              const updated = { ...prev, [data.key]: data.value };
+              AsyncStorage.setItem(scormKey, JSON.stringify(updated));
+              return updated;
+            });
             break;
           case 'commit':
             console.log('SCORM Data Committed:', data.data);
@@ -451,13 +494,11 @@ const ScormPlayer = () => {
               audioElements.forEach(function(element) {
                 element.muted = false;
                 element.volume = 1.0;
-                if (element.duration && ${initialProgress} > 0) {
-                  var targetTime = (element.duration * ${initialProgress}) / 100;
-                  element.currentTime = targetTime;
+                if (element.play) {
+                  element.play().catch(function(error) {
+                    console.log('Post-load audio failed:', error);
+                  });
                 }
-                element.play().catch(function(error) {
-                  console.log('Post-load audio failed:', error);
-                });
               });
             `;
             webViewRef.current?.injectJavaScript(script);
@@ -517,6 +558,7 @@ const ScormPlayer = () => {
                     <View style={[styles.miniProgressFill, { width: `${tProgress}%` }]} />
                   </View>
                 )}
+
                 {!isLocked && (
                   <Text style={styles.topicProgressText}>{tProgress}%</Text>
                 )}
