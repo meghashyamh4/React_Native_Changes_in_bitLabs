@@ -28,8 +28,9 @@
     "@react-navigation/native-stack": "^7.2.0",
     "@react-navigation/stack": "^7.0.0",
     "@shopify/flash-list": "^1.6.4",
+    "@types/xml2js": "^0.4.14",
     "axios": "1.7.9",
-    "buffer": "6.0.3",
+    "buffer": "^6.0.3",
     "crypto-js": "^3.1.9-1",
     "date-fns": "^4.1.0",
     "dotenv": "16.4.7",
@@ -37,6 +38,7 @@
     "html-entities": "2.5.2",
     "i": "0.3.7",
     "intl": "^1.2.5",
+    "jszip": "^3.10.1",
     "progress": "2.0.3",
     "prop-types": "15.8.1",
     "react": "18.3.1",
@@ -76,7 +78,9 @@
     "react-native-video": "^6.17.0",
     "react-native-video-controls": "^2.8.1",
     "react-native-video-player": "^0.16.3",
-    "react-native-webview": "^13.16.0"
+    "react-native-webview": "^13.16.0",
+    "react-native-xml2js": "^1.0.3",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

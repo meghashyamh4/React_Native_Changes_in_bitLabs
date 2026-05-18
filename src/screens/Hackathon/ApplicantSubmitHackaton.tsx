@@ -195,13 +195,13 @@ const ApplicantSubmitHackathon = () => {
 
       // Navigate to Arena page after successful submission
       try {
-        navigation.navigate('BottomTab', { screen: 'Arena' });
+        navigation.navigate('BottomTab', { screen: 'Hackathon' });
       } catch (error) {
         console.error('Navigation error:', error);
         // Fallback navigation
         navigation.reset({
           index: 0,
-          routes: [{ name: 'BottomTab', params: { screen: 'Arena' } }],
+          routes: [{ name: 'BottomTab', params: { screen: 'Hackathon' } }],
         });
       }
     } catch (err: any) {

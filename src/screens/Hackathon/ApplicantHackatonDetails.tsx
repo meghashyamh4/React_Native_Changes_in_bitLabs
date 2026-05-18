@@ -88,21 +88,6 @@ const ApplicantHackathonDetails = () => {
     }, [hackathonId])
   );
 
-  // Handle back button press to navigate to Arena tab with correct tab
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
-      // Use the tab parameter that was passed when navigating to details
-      // This ensures we return to the same tab (e.g., "ACTIVE", "RECOMMENDED", etc.)
-      const tabToUse = tab || 'MY';
-      // Prevent default back behavior
-      e.preventDefault();
-      // Navigate to BottomTab with Arena screen and tab parameter
-      // This preserves the tab state (e.g., if user was on "ACTIVE", they return to "ACTIVE")
-      navigation.navigate('BottomTab' as any, { screen: 'Arena', params: { tab: tabToUse } } as any);
-    });
-
-    return unsubscribe;
-  }, [navigation, tab]);
 
   // Handle Register Button Click - Show Confirmation Modal
   const handleRegisterClick = () => {

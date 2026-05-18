@@ -6,6 +6,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import ProgressService from '@services/Progress/ProgressService';
 import { useAuth } from '@context/Authcontext';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ScormService from '../../services/Scorm/ScormService';
 
 const { width } = Dimensions.get('window');
 
@@ -73,6 +74,15 @@ const ScormPlayer = () => {
   const selectedTopicRef = useRef(0);
   selectedTopicRef.current = selectedTopicIndex;
 
+  // Refs to avoid stale closures in callbacks
+  const lastVisitedRef = useRef<number>(0);
+  const totalCountRef = useRef<number>(0);
+  totalCountRef.current = totalCount;
+  const topicProgressRef = useRef<Record<number, number>>({});
+  topicProgressRef.current = topicProgress;
+  // Flag: only allow DB saves after initial server load is done
+  const serverLoadedRef = useRef(false);
+
   const courseContent = COURSE_DATA[courseName?.toLowerCase()] || [];
   const currentUrl = courseContent[selectedTopicIndex]?.videos[0]?.url || initialUrl;
 
@@ -86,18 +96,81 @@ const ScormPlayer = () => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  // Core reusable calculation from web implementation
+  // Parse Articulate bitstring from cmi.suspend_data
+  // Each '1' in the string = one subtopic that was visited
+  const parseSuspendData = useCallback((data: string): number => {
+    try {
+      const match = data.match(/[01]{4,}/);
+      if (match) {
+        return match[0].split('').filter(c => c === '1').length;
+      }
+    } catch (e) {}
+    return 0;
+  }, []);
+
+  // Save the current topic progress to backend DB
+  const saveTopicToDb = useCallback(async (topicIdx: number, progress: number) => {
+    if (!userId || progress <= 0) return;
+    try {
+      // Use the latest topicProgress from ref to compute overall
+      const allProgress = { ...topicProgressRef.current, [topicIdx]: progress };
+      const totalProg = Object.values(allProgress).reduce((a, b) => a + b, 0);
+      const overall = courseContent.length > 0
+        ? Math.round(totalProg / courseContent.length)
+        : progress;
+
+      await ProgressService.saveProgress({
+        applicantId: userId,
+        courseId: getCourseId(courseName),
+        courseName: courseName || `Course ${courseId}`,
+        overallProgress: overall,
+        totalProgress: overall,
+        topicIndex: topicIdx,
+        topicName: courseContent[topicIdx]?.topic || '',
+        topicProgress: progress,
+      });
+      console.log(`💾 [DB] ✅ Topic ${topicIdx} → ${progress}% | Overall: ${overall}%`);
+    } catch (error) {
+      console.error('❌ [DB] Save failed:', error);
+    }
+  }, [userId, courseName, courseId, courseContent]);
+
+  // Core progress updater — called whenever SCORM reports slide activity
   const updateProgressState = useCallback((visited: number, total: number) => {
-    if (!total || total === 0) return;
+    if (!total || total === 0 || visited < 0) return;
+    const finalTotal = Math.max(total, 1);
+    const progress = Math.min(Math.round((visited / finalTotal) * 100), 100);
+    const idx = selectedTopicRef.current;
+    const existing = topicProgressRef.current[idx] || 0;
 
-    const progress = Math.min(Math.round((visited / total) * 100), 100);
+    // Slide transition logging
+    if (visited > lastVisitedRef.current) {
+      console.log('----------------------------------------');
+      console.log(`✅ [SCORM] SUBTOPIC ${lastVisitedRef.current} COMPLETED`);
+      console.log(`🚀 [SCORM] MOVING TO SUBTOPIC: ${visited} / ${finalTotal}`);
+      console.log(`📊 [SCORM] PROGRESS: ${progress}%`);
+      console.log('----------------------------------------');
+      lastVisitedRef.current = visited;
+    }
 
-    console.log("📊 VISITED:", visited, "TOTAL:", total, "PROGRESS:", progress);
-
+    // Always update the UI progress bar
     setCurrentProgress(progress);
     setVisitedCount(visited);
-    setTotalCount(total);
-  }, []);
+
+    // Update sidebar + save to DB only if strictly increasing (monotonic)
+    if (progress > existing) {
+      setTopicProgress(prev => ({ ...prev, [idx]: progress }));
+
+      // Persist locally
+      const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
+      AsyncStorage.setItem(progressKey, JSON.stringify({ visited, total: finalTotal })).catch(() => {});
+
+      // Save to backend DB
+      if (serverLoadedRef.current) {
+        saveTopicToDb(idx, progress);
+      }
+    }
+  }, [courseId, saveTopicToDb]);
 
   // Load initial progress from AsyncStorage for the active topic
   const loadInitialProgress = useCallback(async () => {
@@ -211,22 +284,63 @@ const ScormPlayer = () => {
         console.error('Error loading topic progress:', err);
       } finally {
         setProgressLoaded(true);
+        serverLoadedRef.current = true; // Allow DB writes from here on
       }
     };
     loadTopicProgress();
   }, [userId, courseName]);
 
-  // SCORM progress tracking effect (adapted from web implementation)
+  // ── Load manifest subtopic count + local progress when topic changes ──
   useEffect(() => {
-    loadInitialProgress();
+    let cancelled = false;
+    const idx = selectedTopicRef.current;
 
-    // Set up interval to check AsyncStorage periodically
-    const interval = setInterval(loadInitialProgress, 4000);
+    const setup = async () => {
+      // Reset slide tracking for this topic
+      lastVisitedRef.current = 0;
 
-    return () => {
-      clearInterval(interval);
+      // 1. Fetch manifest to get real subtopic count
+      let subtopicCount = 0;
+      if (currentUrl && currentUrl.startsWith('http')) {
+        subtopicCount = await ScormService.countSubtopicsFromUrl(currentUrl);
+      }
+      const finalTotal = subtopicCount > 0 ? subtopicCount : (totalCount || 10);
+      if (!cancelled) {
+        setTotalCount(finalTotal);
+        totalCountRef.current = finalTotal;
+        console.log(`📚 [SCORM] Topic ${idx}: ${finalTotal} subtopics in menu`);
+      }
+
+      // 2. Load cached progress from AsyncStorage
+      try {
+        const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
+        const raw = await AsyncStorage.getItem(progressKey);
+        if (raw && !cancelled) {
+          const cached = JSON.parse(raw);
+          const v = cached.visited || 0;
+          const t = cached.total || finalTotal;
+          if (v > 0) updateProgressState(v, t);
+        }
+
+        const scormKey = `scorm_data_${courseId}_topic_${idx}`;
+        const savedScorm = await AsyncStorage.getItem(scormKey);
+        if (savedScorm && !cancelled) {
+          const parsed = JSON.parse(savedScorm);
+          setScormData(parsed);
+          webViewRef.current?.injectJavaScript(`
+            if (window.API) {
+              window.scormData = ${JSON.stringify(parsed)};
+            }
+          `);
+        }
+      } catch (e) {
+        console.log('Error loading cached SCORM data', e);
+      }
     };
-  }, [loadInitialProgress]);
+
+    setup();
+    return () => { cancelled = true; };
+  }, [selectedTopicIndex, currentUrl, courseId]);
 
   // Handle back button press
   useEffect(() => {
@@ -386,77 +500,81 @@ const ScormPlayer = () => {
   const handleMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      console.log('📥 SCORM Message:', data);
 
-      // Handle different types of SCORM messages (adapted from web implementation)
+      if (data.type === 'setValue') {
+        const { key, value } = data;
+        console.log(`🔍 [SCORM] ${key} = "${value}"`);
 
-      // ✅ BEST CASE → SCORM sends both values
-      if (data.type === "SCORM_PROGRESS") {
-        const visited = data.current || 0;
-        const total = data.total || totalCount || 1;
-
-        updateProgressState(visited, total);
-      }
-
-      // ✅ Articulate / LMS events
-      else if (data.type === "SCORM_EVENT") {
-        if (
-          data.action === "SLIDE_VISIT" ||
-          data.action === "PROGRESS_UPDATE"
-        ) {
-          const visited = data.slideNumber || data.visited || 0;
-          const total = data.totalSlides || data.total || totalCount || visited || 1;
-
-          updateProgressState(visited, total);
-        }
-
-        // fallback (only slide number comes)
-        if (data.action === "LMSSetValue") {
-          if (
-            data.key === "cmi.core.lesson_location" ||
-            data.key === "cmi.location"
-          ) {
-            const visited = parseInt(data.value) || 0;
-
-            updateProgressState(visited, totalCount || visited || 1);
+        // 1. cmi.core.lesson_location → current slide number
+        if (key === 'cmi.core.lesson_location') {
+          const match = value.match(/(\d+)/);
+          const slideNum = match ? parseInt(match[1]) : NaN;
+          if (!isNaN(slideNum) && slideNum > 0) {
+            console.log(`📍 lesson_location → subtopic ${slideNum} of ${totalCountRef.current}`);
+            updateProgressState(slideNum, totalCountRef.current || slideNum);
           }
         }
-      }
 
-      // ✅ fallback generic
-      else if (data.type === "progress") {
-        const progress = Math.round(data.value || 0);
-        setCurrentProgress(progress);
-        console.log("progress", progress);
-      }
-
-      // Original SCORM messages
-      else {
-        switch (data.type) {
-          case 'setValue':
-            console.log('SCORM Data Set:', data.key, data.value);
-            // Persist SCORM data to AsyncStorage
-            const idx = selectedTopicRef.current;
-            const scormKey = `scorm_data_${courseId}_topic_${idx}`;
-            setScormData(prev => {
-              const updated = { ...prev, [data.key]: data.value };
-              AsyncStorage.setItem(scormKey, JSON.stringify(updated));
-              return updated;
-            });
-            break;
-          case 'commit':
-            console.log('SCORM Data Committed:', data.data);
-            break;
-          case 'finish':
-            console.log('SCORM Session Finished:', data.data);
-            saveProgressAndExit();
-            break;
-          default:
-            console.log('SCORM Unknown Message:', data);
+        // 2. cmi.suspend_data → bitstring: count 1s = visited subtopics
+        if (key === 'cmi.suspend_data') {
+          const visited = parseSuspendData(value);
+          console.log(`📦 suspend_data → ${visited} of ${totalCountRef.current} subtopics visited`);
+          if (visited > 0) {
+            updateProgressState(visited, totalCountRef.current || visited);
+          }
         }
+
+        // 3. cmi.core.score.raw → numeric score (0–100)
+        if (key === 'cmi.core.score.raw') {
+          const score = parseFloat(value);
+          if (!isNaN(score) && score > 0) {
+            console.log(`🎯 score.raw → ${score}%`);
+            updateProgressState(score, 100);
+          }
+        }
+
+        // 4. cmi.core.lesson_status → completion state
+        if (key === 'cmi.core.lesson_status') {
+          console.log(`🏁 lesson_status → "${value}"`);
+          if (value === 'completed' || value === 'passed') {
+            const total = totalCountRef.current || 1;
+            updateProgressState(total, total); // 100%
+          }
+        }
+
+        // Persist all SCORM data locally
+        const idx = selectedTopicRef.current;
+        const scormKey = `scorm_data_${courseId}_topic_${idx}`;
+        setScormData(prev => {
+          const updated = { ...prev, [key]: value };
+          AsyncStorage.setItem(scormKey, JSON.stringify(updated)).catch(() => {});
+          return updated;
+        });
+        return;
       }
+
+      if (data.type === 'commit' && data.data) {
+        // Also scan commit snapshot for the 4 keys as a fallback
+        const snap = data.data as Record<string, string>;
+        if (snap['cmi.core.lesson_status'] === 'completed' || snap['cmi.core.lesson_status'] === 'passed') {
+          const total = totalCountRef.current || 1;
+          updateProgressState(total, total);
+        }
+        return;
+      }
+
+      if (data.type === 'finish' && data.data) {
+        const snap = data.data as Record<string, string>;
+        const total = totalCountRef.current || 1;
+        if (snap['cmi.core.lesson_status'] === 'completed' || snap['cmi.core.lesson_status'] === 'passed') {
+          updateProgressState(total, total);
+        }
+        saveProgressAndExit();
+        return;
+      }
+
     } catch (error) {
-      console.error('SCORM Message Error:', error);
+      console.error('❌ [SCORM] Message error:', error);
     }
   };
 

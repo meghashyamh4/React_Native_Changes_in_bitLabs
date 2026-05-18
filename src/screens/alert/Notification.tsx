@@ -60,7 +60,7 @@ function formatDate(dateString : String) {
 
     if (alert.feature === 'hackathon') {
       if (fId) navigation.navigate('ApplicantHackathonDetails', { id: fId });
-      else navigation.navigate('BottomTab', { screen: 'Arena' });
+      else navigation.navigate('BottomTab', { screen: 'Hackathon' });
     } else if (alert.feature === 'blog' || alert.feature === 'Tech Vibes') {
       navigation.navigate('TechVibes', fId ? { blogId: fId } : undefined);
     } else if (alert.feature === 'Mentor Connect') {
