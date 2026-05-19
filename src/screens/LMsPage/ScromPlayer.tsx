@@ -71,6 +71,7 @@ const ScormPlayer = () => {
   const [scormData, setScormData] = useState<Record<string, string>>({});
   const [courseProgressId, setCourseProgressId] = useState<number | null>(null);
   const [progressLoaded, setProgressLoaded] = useState(false);
+  const [topicSetupDone, setTopicSetupDone] = useState(false);
   const selectedTopicRef = useRef(0);
   selectedTopicRef.current = selectedTopicIndex;
 
@@ -111,7 +112,7 @@ const ScormPlayer = () => {
           total: bitstring.length
         };
       }
-      
+
       // Fallback: match any sequence of 0s and 1s of length >= 2 ONLY if it spans the entire string
       const matchRaw = data.match(/^([01]{2,})$/);
       if (matchRaw) {
@@ -121,7 +122,7 @@ const ScormPlayer = () => {
           total: bitstring.length
         };
       }
-    } catch (e) {}
+    } catch (e) { }
     return null;
   }, []);
 
@@ -190,13 +191,13 @@ const ScormPlayer = () => {
     setCurrentProgress(activeProgress);
     setVisitedCount(activeVisited);
 
-    // Update sidebar + save to DB only if strictly increasing (monotonic)
+    // Save and update state if progress is greater than existing (monotonic)
     if (progress > existing) {
       setTopicProgress(prev => ({ ...prev, [idx]: progress }));
 
       // Persist locally
       const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
-      AsyncStorage.setItem(progressKey, JSON.stringify({ visited: activeVisited, total: finalTotal })).catch(() => {});
+      AsyncStorage.setItem(progressKey, JSON.stringify({ visited: activeVisited, total: finalTotal })).catch(() => { });
 
       // Save to backend DB
       if (serverLoadedRef.current) {
@@ -288,7 +289,7 @@ const ScormPlayer = () => {
 
           const topicsRes = await ProgressService.getCourseTopics(currentCourse.id);
           console.log('📡 [Backend Topics] Raw response:', topicsRes);
-          
+
           const topics = topicsRes?.data?.data || topicsRes?.data || topicsRes || [];
           console.log('📡 [Backend Topics] Parsed topics list:', topics);
 
@@ -344,6 +345,7 @@ const ScormPlayer = () => {
     const idx = selectedTopicIndex;
 
     const setup = async () => {
+      setTopicSetupDone(false);
       // Reset slide tracking for this topic
       lastVisitedRef.current = 0;
       activeSlideRef.current = 1;
@@ -372,8 +374,8 @@ const ScormPlayer = () => {
         if (dbProgress === 0) {
           // Database says progress is 0. Clear any local cache to allow a clean reset!
           console.log(`🧹 [SCORM] Database progress is 0. Clearing local cache for topic ${idx}`);
-          await AsyncStorage.removeItem(progressKey).catch(() => {});
-          await AsyncStorage.removeItem(scormKey).catch(() => {});
+          await AsyncStorage.removeItem(progressKey).catch(() => { });
+          await AsyncStorage.removeItem(scormKey).catch(() => { });
         } else {
           // Database has progress > 0. Check local cache.
           visited = Math.round((dbProgress / 100) * finalTotal);
@@ -422,21 +424,18 @@ const ScormPlayer = () => {
 
         if (Object.keys(activeScormData).length > 0 && !cancelled) {
           setScormData(activeScormData);
-          webViewRef.current?.injectJavaScript(`
-            if (window.API) {
-              window.scormData = ${JSON.stringify(activeScormData)};
-            }
-          `);
         } else if (dbProgress === 0 && !cancelled) {
           setScormData({});
-          webViewRef.current?.injectJavaScript(`
-            if (window.API) {
-              window.scormData = {};
-            }
-          `);
+        }
+
+        if (!cancelled) {
+          setTopicSetupDone(true);
         }
       } catch (e) {
         console.log('Error restoring progress/SCORM data', e);
+        if (!cancelled) {
+          setTopicSetupDone(true);
+        }
       }
     };
 
@@ -463,7 +462,7 @@ const ScormPlayer = () => {
 
   const injectedJS = `
     (function() {
-      var scormData = {};
+      var scormData = ${JSON.stringify(scormData)};
       var isInitialized = false;
       var hasUserInteracted = false;
       window.parent = window;
@@ -607,23 +606,11 @@ const ScormPlayer = () => {
         const { key, value } = data;
         console.log(`🔍 [SCORM] ${key} = "${value}"`);
 
-        // 1. cmi.core.lesson_location → current slide number (strictly reserved for SCORM resumption location, NOT completion progress)
+        // 1. cmi.core.lesson_location → current slide identifier (strictly reserved for SCORM resumption location, NOT completion progress)
         if (key === 'cmi.core.lesson_location') {
-          const match = value.match(/(\d+)/);
-          const slideNum = match ? parseInt(match[1]) : NaN;
-          if (!isNaN(slideNum) && slideNum > 0) {
-            activeSlideRef.current = slideNum;
-            let currentTotal = totalCountRef.current || slideNum;
-            if (slideNum > currentTotal) {
-              setTotalCount(slideNum);
-              totalCountRef.current = slideNum;
-              currentTotal = slideNum;
-            }
-            console.log(`📍 lesson_location → active subtopic ${slideNum} of ${currentTotal}`);
-            
-            // Sync progress state immediately with active slide
-            updateProgressState(Math.max(visitedCount, slideNum), currentTotal);
-          }
+          console.log(`📍 lesson_location → active subtopic set to: "${value}"`);
+          // Storing the lesson location for resumption.
+          // We strictly avoid parsing it or using it to update progress to prevent arbitrary string values (e.g. hash identifiers containing digits) from corrupting the subtopic count or visited count.
         }
 
         // 2. cmi.suspend_data → bitstring: count 1s = visited subtopics
@@ -635,9 +622,8 @@ const ScormPlayer = () => {
               setTotalCount(res.total);
               totalCountRef.current = res.total;
             }
-            // Ensure the active slide is always counted as visited!
-            const finalVisited = Math.max(res.visited, activeSlideRef.current);
-            updateProgressState(finalVisited, res.total);
+            // Use the exact visited count reported by suspend_data
+            updateProgressState(res.visited, res.total);
           }
         }
 
@@ -664,7 +650,7 @@ const ScormPlayer = () => {
         const scormKey = `scorm_data_${courseId}_topic_${idx}`;
         setScormData(prev => {
           const updated = { ...prev, [key]: value };
-          AsyncStorage.setItem(scormKey, JSON.stringify(updated)).catch(() => {});
+          AsyncStorage.setItem(scormKey, JSON.stringify(updated)).catch(() => { });
           return updated;
         });
         return;
@@ -695,7 +681,7 @@ const ScormPlayer = () => {
     }
   };
 
-  if (!progressLoaded) {
+  if (!progressLoaded || !topicSetupDone) {
     return (
       <View style={[styles.container, styles.loadingCenter]}>
         <ActivityIndicator size="large" color="#F5A623" />
@@ -706,6 +692,20 @@ const ScormPlayer = () => {
 
   return (
     <View style={styles.container}>
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <View style={styles.navHeaderRow}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.navBackButton}
+          >
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.heading}>{courseName}</Text>
+          <View style={styles.navBackButtonPlaceholder} />
+        </View>
+      </View>
+
       {/* WebView Player */}
       <WebView
         ref={webViewRef}
@@ -757,6 +757,15 @@ const ScormPlayer = () => {
       <TouchableOpacity style={styles.toggleButton} onPress={toggleSidebar}>
         <Ionicons name={sidebarVisible ? "close" : "menu"} size={28} color="#fff" />
       </TouchableOpacity>
+
+      {/* Backdrop for closing sidebar */}
+      {sidebarVisible && (
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={toggleSidebar}
+        />
+      )}
 
       {/* Sidebar Drawer */}
       <Animated.View style={[styles.sidebar, { transform: [{ translateX: slideAnim }] }]}>
@@ -820,9 +829,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  header: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  navHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  navBackButton: {
+    padding: 4,
+  },
+  navBackButtonPlaceholder: {
+    width: 32,
+  },
+  heading: {
+    fontSize: 18,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: '#000',
+    flex: 1,
+    textAlign: 'center',
+  },
   toggleButton: {
     position: 'absolute',
-    top: 40,
+    top: 90,
     left: 20,
     zIndex: 1000,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -842,7 +877,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 10,
-    paddingTop: 50,
+    paddingTop: 140,
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 998,
   },
   sidebarHeader: {
     padding: 20,

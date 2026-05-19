@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@models/Model';
 import CourseCard from './CourseCard';
 import ProgressService from '@services/Progress/ProgressService';
 import { useAuth } from '@context/Authcontext';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'ScormPlayer'>;
 const LMSMainPage = () => {
@@ -119,6 +120,19 @@ const LMSMainPage = () => {
       style={styles.background}
     >
       <View style={styles.container}>
+        {/* Custom Header */}
+        <View style={styles.header}>
+          <View style={styles.navHeaderRow}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.navBackButton}
+            >
+              <MaterialIcon name="arrow-back" size={24} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.heading}>LMS Main Page</Text>
+            <View style={styles.navBackButtonPlaceholder} />
+          </View>
+        </View>
 
         {loading ? (
           <View style={styles.centerContainer}>
@@ -154,9 +168,32 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    marginTop: 90,
-    alignItems: 'center',
     backgroundColor: 'transparent',
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  navHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  navBackButton: {
+    padding: 4,
+  },
+  navBackButtonPlaceholder: {
+    width: 32,
+  },
+  heading: {
+    fontSize: 18,
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: '#000',
+    flex: 1,
+    textAlign: 'center',
   },
   title: {
     fontSize: 24,

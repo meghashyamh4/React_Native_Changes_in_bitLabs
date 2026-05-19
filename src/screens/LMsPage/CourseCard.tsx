@@ -47,14 +47,13 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
           <Text style={styles.progressText}>{progress}% completed</Text>
 
-          {/* Continue Button */}
           <TouchableOpacity 
             style={styles.button} 
             onPress={onPress}
             activeOpacity={0.8}
           >
             <Text style={styles.buttonText}>
-              {progress === 100 ? 'Revisit' : progress > 0 ? 'Continue' : 'Play'}
+              {progress > 0 && progress < 100 ? 'Continue' : 'Play'}
             </Text>
           </TouchableOpacity>
         </View>
