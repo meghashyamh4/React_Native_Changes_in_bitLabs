@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { View, BackHandler, TouchableOpacity, Text, ScrollView, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, BackHandler, TouchableOpacity, Text, ScrollView, StyleSheet, Animated, Dimensions, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -12,11 +12,11 @@ const { width } = Dimensions.get('window');
 
 const COURSE_DATA: Record<string, any[]> = {
   "html & css": [
-    { topic: "Introduction to Web App", videos: [{ title: "What is a Web Application?", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/introductiontowebapp_topic1/story.html" }] },
-    { topic: "HTML for Beginners", videos: [{ title: "Basics of HTML Structure", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/htmlforbegginers_topic2/story.html" }] },
-    { topic: "CSS Part 1", videos: [{ title: "Introduction to CSS Styling", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/csspart1_topic3/story.html" }] },
-    { topic: "CSS Part 2", videos: [{ title: "Advanced CSS Concepts", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/csspart2_topic4/story.html" }] },
-    { topic: "HTML Forms", videos: [{ title: "Creating Forms in HTML", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/HTML%20FORMS_topic5/story.html" }] },
+    { topic: "Introduction to Web App", videos: [{ title: "What is a Web Application?", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/introductiontowebapp_topic1/index_lms.html" }] },
+    { topic: "HTML for Beginners", videos: [{ title: "Basics of HTML Structure", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/htmlforbegginers_topic2/index_lms.html" }] },
+    { topic: "CSS Part 1", videos: [{ title: "Introduction to CSS Styling", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/csspart1_topic3/index_lms.html" }] },
+    { topic: "CSS Part 2", videos: [{ title: "Advanced CSS Concepts", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/csspart2_topic4/index_lms.html" }] },
+    { topic: "HTML Forms", videos: [{ title: "Creating Forms in HTML", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/HTML%20FORMS_topic5/index_lms.html" }] },
   ],
   // "python": [
   //   { topic: "Introduction to python", videos: [{ title: "What is a python?", url: "/python for beginners/Introduction to Python_topic1/index_lms.html" }] },
@@ -57,7 +57,7 @@ const ScormPlayer = () => {
   const [isInteracted, setIsInteracted] = React.useState(false);
   const webViewRef = useRef<WebView>(null);
   const { url: initialUrl, progress: initialProgress, courseId, courseName } = route.params as { url?: string; progress: number; courseId: number; courseName: string };
-  const [currentProgress, setCurrentProgress] = useState(initialProgress);
+  const [currentProgress, setCurrentProgress] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [visitedCount, setVisitedCount] = useState(0);
 
@@ -76,6 +76,7 @@ const ScormPlayer = () => {
 
   // Refs to avoid stale closures in callbacks
   const lastVisitedRef = useRef<number>(0);
+  const activeSlideRef = useRef<number>(1);
   const totalCountRef = useRef<number>(0);
   totalCountRef.current = totalCount;
   const topicProgressRef = useRef<Record<number, number>>({});
@@ -97,15 +98,31 @@ const ScormPlayer = () => {
   };
 
   // Parse Articulate bitstring from cmi.suspend_data
-  // Each '1' in the string = one subtopic that was visited
-  const parseSuspendData = useCallback((data: string): number => {
+  // Extracts both the visited slides and the total slide count.
+  const parseSuspendData = useCallback((data: string): { visited: number; total: number } | null => {
     try {
-      const match = data.match(/[01]{4,}/);
-      if (match) {
-        return match[0].split('').filter(c => c === '1').length;
+      // In Articulate Storyline, suspend_data contains a bitstring (0s and 1s) representing slide progress.
+      // It is often preceded by 'u' (e.g. '2u101000...')
+      const matchU = data.match(/u([01]{2,})/);
+      if (matchU) {
+        const bitstring = matchU[1];
+        return {
+          visited: bitstring.split('').filter(c => c === '1').length,
+          total: bitstring.length
+        };
+      }
+      
+      // Fallback: match any sequence of 0s and 1s of length >= 2 ONLY if it spans the entire string
+      const matchRaw = data.match(/^([01]{2,})$/);
+      if (matchRaw) {
+        const bitstring = matchRaw[0];
+        return {
+          visited: bitstring.split('').filter(c => c === '1').length,
+          total: bitstring.length
+        };
       }
     } catch (e) {}
-    return 0;
+    return null;
   }, []);
 
   // Save the current topic progress to backend DB
@@ -115,9 +132,14 @@ const ScormPlayer = () => {
       // Use the latest topicProgress from ref to compute overall
       const allProgress = { ...topicProgressRef.current, [topicIdx]: progress };
       const totalProg = Object.values(allProgress).reduce((a, b) => a + b, 0);
-      const overall = courseContent.length > 0
+      let overall = courseContent.length > 0
         ? Math.round(totalProg / courseContent.length)
         : progress;
+
+      // Safeguard: if user has seen some portion (totalProg > 0) but overall rounds down to 0, force it to 1%
+      if (totalProg > 0 && overall === 0) {
+        overall = 1;
+      }
 
       await ProgressService.saveProgress({
         applicantId: userId,
@@ -138,6 +160,14 @@ const ScormPlayer = () => {
   // Core progress updater — called whenever SCORM reports slide activity
   const updateProgressState = useCallback((visited: number, total: number) => {
     if (!total || total === 0 || visited < 0) return;
+
+    // Dynamically adjust totalCount if a more accurate total is provided (e.g. > 1 when current is 1 or 10)
+    if (total > 1 && total !== totalCountRef.current) {
+      console.log(`🔄 [SCORM] Dynamically updating total subtopics: ${totalCountRef.current} → ${total}`);
+      setTotalCount(total);
+      totalCountRef.current = total;
+    }
+
     const finalTotal = Math.max(total, 1);
     const progress = Math.min(Math.round((visited / finalTotal) * 100), 100);
     const idx = selectedTopicRef.current;
@@ -153,9 +183,12 @@ const ScormPlayer = () => {
       lastVisitedRef.current = visited;
     }
 
-    // Always update the UI progress bar
-    setCurrentProgress(progress);
-    setVisitedCount(visited);
+    // Prevent regression of the UI progress bar and visited count compared to recorded/existing progress
+    const activeProgress = Math.max(progress, existing);
+    const activeVisited = Math.max(visited, Math.round((existing / 100) * finalTotal));
+
+    setCurrentProgress(activeProgress);
+    setVisitedCount(activeVisited);
 
     // Update sidebar + save to DB only if strictly increasing (monotonic)
     if (progress > existing) {
@@ -163,7 +196,7 @@ const ScormPlayer = () => {
 
       // Persist locally
       const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
-      AsyncStorage.setItem(progressKey, JSON.stringify({ visited, total: finalTotal })).catch(() => {});
+      AsyncStorage.setItem(progressKey, JSON.stringify({ visited: activeVisited, total: finalTotal })).catch(() => {});
 
       // Save to backend DB
       if (serverLoadedRef.current) {
@@ -215,10 +248,10 @@ const ScormPlayer = () => {
       if (!userId) return;
 
       const idx = selectedTopicRef.current;
-      const topicProg = topicProgress[idx] || currentProgress;
+      const topicProg = topicProgressRef.current[idx] || currentProgress;
 
       // Recalculate overall progress from all topics
-      const updatedTopicProgress = { ...topicProgress, [idx]: topicProg };
+      const updatedTopicProgress = { ...topicProgressRef.current, [idx]: topicProg };
       const totalProg = Object.values(updatedTopicProgress).reduce((a, b) => a + b, 0);
       const overall = courseContent.length > 0 ? Math.round(totalProg / courseContent.length) : topicProg;
 
@@ -245,25 +278,38 @@ const ScormPlayer = () => {
       if (!userId) return;
       try {
         const applicantCourses = await ProgressService.getApplicantProgress(userId.toString());
-        const courses = applicantCourses?.data || applicantCourses || [];
+        const courses = applicantCourses?.data?.data || applicantCourses?.data || applicantCourses || [];
         const currentCourse = (Array.isArray(courses) ? courses : []).find(
-          (c: any) => c.courseName?.toLowerCase() === courseName?.toLowerCase()
+          (c: any) => (c.courseName || c.course_name)?.toLowerCase() === courseName?.toLowerCase()
         );
 
         if (currentCourse) {
           setCourseProgressId(currentCourse.id);
 
           const topicsRes = await ProgressService.getCourseTopics(currentCourse.id);
-          const topics = topicsRes?.data || topicsRes || [];
+          console.log('📡 [Backend Topics] Raw response:', topicsRes);
+          
+          const topics = topicsRes?.data?.data || topicsRes?.data || topicsRes || [];
+          console.log('📡 [Backend Topics] Parsed topics list:', topics);
+
           const progressMap: Record<number, number> = {};
           (Array.isArray(topics) ? topics : []).forEach((t: any) => {
-            progressMap[t.topicIndex] = t.topicProgress || 0;
+            const idx = t.topicIndex !== undefined ? Number(t.topicIndex) : (t.topic_index !== undefined ? Number(t.topic_index) : NaN);
+            const prog = t.topicProgress !== undefined ? t.topicProgress : (t.topic_progress !== undefined ? t.topic_progress : 0);
+            if (!isNaN(idx)) {
+              progressMap[idx] = prog;
+            }
           });
+          console.log('📡 [Backend Topics] Mapped subtopics progress map:', progressMap);
           setTopicProgress(progressMap);
 
           // Auto-select the first incomplete or unlocked topic
           const topicsList = Array.isArray(topics) ? topics : [];
-          const sortedTopics = topicsList.sort((a: any, b: any) => a.topicIndex - b.topicIndex);
+          const sortedTopics = topicsList.sort((a: any, b: any) => {
+            const aIdx = a.topicIndex !== undefined ? Number(a.topicIndex) : Number(a.topic_index || 0);
+            const bIdx = b.topicIndex !== undefined ? Number(b.topicIndex) : Number(b.topic_index || 0);
+            return aIdx - bIdx;
+          });
 
           let nextTopicIndex = 0;
           for (let i = 0; i < courseContent.length; i++) {
@@ -292,55 +338,111 @@ const ScormPlayer = () => {
 
   // ── Load manifest subtopic count + local progress when topic changes ──
   useEffect(() => {
+    if (!progressLoaded) return;
+
     let cancelled = false;
-    const idx = selectedTopicRef.current;
+    const idx = selectedTopicIndex;
 
     const setup = async () => {
       // Reset slide tracking for this topic
       lastVisitedRef.current = 0;
+      activeSlideRef.current = 1;
 
       // 1. Fetch manifest to get real subtopic count
       let subtopicCount = 0;
       if (currentUrl && currentUrl.startsWith('http')) {
         subtopicCount = await ScormService.countSubtopicsFromUrl(currentUrl);
       }
-      const finalTotal = subtopicCount > 0 ? subtopicCount : (totalCount || 10);
+      const finalTotal = subtopicCount > 1 ? subtopicCount : (totalCount > 1 ? totalCount : 10);
       if (!cancelled) {
         setTotalCount(finalTotal);
         totalCountRef.current = finalTotal;
         console.log(`📚 [SCORM] Topic ${idx}: ${finalTotal} subtopics in menu`);
       }
 
-      // 2. Load cached progress from AsyncStorage
+      // 2. Load cached progress from Database and AsyncStorage
       try {
+        let visited = 0;
+        let total = finalTotal;
+
+        const dbProgress = topicProgressRef.current[idx] || 0;
         const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
-        const raw = await AsyncStorage.getItem(progressKey);
-        if (raw && !cancelled) {
-          const cached = JSON.parse(raw);
-          const v = cached.visited || 0;
-          const t = cached.total || finalTotal;
-          if (v > 0) updateProgressState(v, t);
+        const scormKey = `scorm_data_${courseId}_topic_${idx}`;
+
+        if (dbProgress === 0) {
+          // Database says progress is 0. Clear any local cache to allow a clean reset!
+          console.log(`🧹 [SCORM] Database progress is 0. Clearing local cache for topic ${idx}`);
+          await AsyncStorage.removeItem(progressKey).catch(() => {});
+          await AsyncStorage.removeItem(scormKey).catch(() => {});
+        } else {
+          // Database has progress > 0. Check local cache.
+          visited = Math.round((dbProgress / 100) * finalTotal);
+
+          const raw = await AsyncStorage.getItem(progressKey);
+          if (raw) {
+            const cached = JSON.parse(raw);
+            const cv = cached.visited || 0;
+            const ct = cached.total || finalTotal;
+            const cachedProgress = ct > 0 ? Math.round((cv / ct) * 100) : 0;
+
+            // If AsyncStorage has a higher progress, use it
+            if (cachedProgress > dbProgress) {
+              visited = cv;
+              total = ct;
+            }
+          }
         }
 
-        const scormKey = `scorm_data_${courseId}_topic_${idx}`;
-        const savedScorm = await AsyncStorage.getItem(scormKey);
-        if (savedScorm && !cancelled) {
-          const parsed = JSON.parse(savedScorm);
-          setScormData(parsed);
+        // Apply initial progress if any
+        if (visited > 0 && !cancelled) {
+          updateProgressState(visited, total);
+        } else if (dbProgress === 0 && !cancelled) {
+          // Explicitly reset player states for 0 progress
+          setCurrentProgress(0);
+          setVisitedCount(0);
+        }
+
+        // 3. Load detailed SCORM data for resumption
+        let activeScormData: Record<string, string> = {};
+        if (dbProgress > 0) {
+          const savedScorm = await AsyncStorage.getItem(scormKey);
+          if (savedScorm) {
+            activeScormData = JSON.parse(savedScorm);
+          } else if (total > 0) {
+            // Reconstruct baseline SCORM variables from database progress
+            const dbVisited = Math.round((dbProgress / 100) * total);
+            const bitstring = '1'.repeat(dbVisited) + '0'.repeat(Math.max(total - dbVisited, 0));
+            activeScormData = {
+              'cmi.core.lesson_location': `${dbVisited}`,
+              'cmi.suspend_data': `2u${bitstring}`,
+              'cmi.core.lesson_status': dbProgress >= 100 ? 'completed' : 'incomplete'
+            };
+          }
+        }
+
+        if (Object.keys(activeScormData).length > 0 && !cancelled) {
+          setScormData(activeScormData);
           webViewRef.current?.injectJavaScript(`
             if (window.API) {
-              window.scormData = ${JSON.stringify(parsed)};
+              window.scormData = ${JSON.stringify(activeScormData)};
+            }
+          `);
+        } else if (dbProgress === 0 && !cancelled) {
+          setScormData({});
+          webViewRef.current?.injectJavaScript(`
+            if (window.API) {
+              window.scormData = {};
             }
           `);
         }
       } catch (e) {
-        console.log('Error loading cached SCORM data', e);
+        console.log('Error restoring progress/SCORM data', e);
       }
     };
 
     setup();
     return () => { cancelled = true; };
-  }, [selectedTopicIndex, currentUrl, courseId]);
+  }, [selectedTopicIndex, currentUrl, courseId, progressLoaded]);
 
   // Handle back button press
   useEffect(() => {
@@ -505,22 +607,37 @@ const ScormPlayer = () => {
         const { key, value } = data;
         console.log(`🔍 [SCORM] ${key} = "${value}"`);
 
-        // 1. cmi.core.lesson_location → current slide number
+        // 1. cmi.core.lesson_location → current slide number (strictly reserved for SCORM resumption location, NOT completion progress)
         if (key === 'cmi.core.lesson_location') {
           const match = value.match(/(\d+)/);
           const slideNum = match ? parseInt(match[1]) : NaN;
           if (!isNaN(slideNum) && slideNum > 0) {
-            console.log(`📍 lesson_location → subtopic ${slideNum} of ${totalCountRef.current}`);
-            updateProgressState(slideNum, totalCountRef.current || slideNum);
+            activeSlideRef.current = slideNum;
+            let currentTotal = totalCountRef.current || slideNum;
+            if (slideNum > currentTotal) {
+              setTotalCount(slideNum);
+              totalCountRef.current = slideNum;
+              currentTotal = slideNum;
+            }
+            console.log(`📍 lesson_location → active subtopic ${slideNum} of ${currentTotal}`);
+            
+            // Sync progress state immediately with active slide
+            updateProgressState(Math.max(visitedCount, slideNum), currentTotal);
           }
         }
 
         // 2. cmi.suspend_data → bitstring: count 1s = visited subtopics
         if (key === 'cmi.suspend_data') {
-          const visited = parseSuspendData(value);
-          console.log(`📦 suspend_data → ${visited} of ${totalCountRef.current} subtopics visited`);
-          if (visited > 0) {
-            updateProgressState(visited, totalCountRef.current || visited);
+          const res = parseSuspendData(value);
+          if (res) {
+            console.log(`📦 suspend_data → ${res.visited} of ${res.total} subtopics visited`);
+            if (res.total > 1 && res.total !== totalCountRef.current) {
+              setTotalCount(res.total);
+              totalCountRef.current = res.total;
+            }
+            // Ensure the active slide is always counted as visited!
+            const finalVisited = Math.max(res.visited, activeSlideRef.current);
+            updateProgressState(finalVisited, res.total);
           }
         }
 
@@ -577,6 +694,15 @@ const ScormPlayer = () => {
       console.error('❌ [SCORM] Message error:', error);
     }
   };
+
+  if (!progressLoaded) {
+    return (
+      <View style={[styles.container, styles.loadingCenter]}>
+        <ActivityIndicator size="large" color="#F5A623" />
+        <Text style={styles.loadingText}>Resuming course progress...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -800,6 +926,17 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#4CAF50',
     borderRadius: 2,
+  },
+  loadingCenter: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '500',
   },
 });
 

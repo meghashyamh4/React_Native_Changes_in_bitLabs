@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@models/Model';
 import CourseCard from './CourseCard';
@@ -40,91 +40,70 @@ const LMSMainPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch progress data when component mounts
+  // Fetch and sync course progress data (on mount, userId load, and screen focus)
   useEffect(() => {
-    const fetchProgressData = async () => {
+    const fetchProgressData = async (isBackground = false) => {
       try {
-        // Use actual userId from auth context
         if (!userId) {
-          console.log('User not authenticated, skipping progress fetch');
-          setLoading(false);
+          console.log('[LMS] User not authenticated, skipping progress fetch');
+          if (!isBackground) setLoading(false);
           return;
         }
 
-        console.log('Fetching progress data for userId:', userId);
+        if (!isBackground) setLoading(true);
+        console.log(`[LMS] Fetching progress for userId: ${userId} (Background: ${isBackground})`);
         const progressResponse = await ProgressService.getApplicantProgress(userId.toString());
-        console.log('Progress API response:', progressResponse);
+        console.log('[LMS] Progress API response:', progressResponse);
 
-        if (progressResponse.data && Array.isArray(progressResponse.data)) {
-          console.log('Updating courses with progress data:', progressResponse.data);
+        const dataArray = progressResponse?.data?.data || progressResponse?.data || progressResponse;
+        if (dataArray && Array.isArray(dataArray)) {
           // Update courses with progress data from database
           setCourses(prevCourses =>
             prevCourses.map(course => {
-              const courseProgress = progressResponse.data.find(
-                (progress: any) => progress.courseId === course.id || progress.course_id === course.id
+              const courseProgress = dataArray.find(
+                (progress: any) => 
+                  Number(progress.courseId || progress.course_id) === Number(course.id) ||
+                  (progress.courseName || progress.course_name || '').toLowerCase().trim() === course.name.toLowerCase().trim()
               );
-              console.log(`Course ${course.name} progress:`, courseProgress);
+              const progVal = courseProgress
+                ? (courseProgress.overallProgress !== undefined 
+                    ? Number(courseProgress.overallProgress) 
+                    : (courseProgress.overall_progress !== undefined 
+                        ? Number(courseProgress.overall_progress) 
+                        : 0))
+                : 0;
               return {
                 ...course,
-                progress: courseProgress ? (courseProgress.overallProgress || 0) : 0
+                progress: progVal
               };
             })
           );
-        } else {
-          console.log('No progress data found or invalid response format');
         }
       } catch (err: any) {
-        console.error('Error fetching progress data:', err);
-        console.error('Error details:', {
-          message: err.message,
-          status: err.response?.status,
-          statusText: err.response?.statusText,
-          data: err.response?.data
-        });
-        setError(`Failed to load progress data: ${err.message}`);
+        console.error('[LMS] Error fetching progress:', err);
+        if (!isBackground) {
+          setError(`Failed to load progress data: ${err.message}`);
+        }
       } finally {
-        setLoading(false);
+        if (!isBackground) setLoading(false);
       }
     };
 
-    fetchProgressData();
-  }, [userId]); // Trigger when userId becomes available
+    // 1. Initial immediate load when userId is available
+    if (userId) {
+      fetchProgressData(false);
+    } else {
+      setLoading(false);
+    }
 
-  // Also refresh data when page comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      const fetchProgressData = async () => {
-        if (!userId) return;
+    // 2. Setup navigation focus listener to refresh progress in the background when returning to this page
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('[LMS] Screen focused, performing background progress refresh');
+      fetchProgressData(true);
+    });
 
-        try {
-          setLoading(true);
-          console.log('Refreshing progress data for userId:', userId);
-          const progressResponse = await ProgressService.getApplicantProgress(userId.toString());
-          console.log('Progress API response (refresh):', progressResponse);
-
-          if (progressResponse.data && Array.isArray(progressResponse.data)) {
-            setCourses(prevCourses =>
-              prevCourses.map(course => {
-                const courseProgress = progressResponse.data.find(
-                  (progress: any) => progress.courseId === course.id || progress.course_id === course.id
-                );
-                return {
-                  ...course,
-                  progress: courseProgress ? (courseProgress.overallProgress || 0) : 0
-                };
-              })
-            );
-          }
-        } catch (err: any) {
-          console.error('Error refreshing progress data:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchProgressData();
-    }, [userId])
-  );
+    return unsubscribe;
+  }, [userId, navigation]);
 
   const handleCoursePress = (courseName: string, courseId: number, courseProgress: number) => {
     navigation.navigate('ScormPlayer', {

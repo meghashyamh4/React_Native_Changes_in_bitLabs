@@ -4,6 +4,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   Dimensions,
 } from 'react-native';
@@ -11,7 +12,8 @@ import {
 const { width } = Dimensions.get('window');
 
 interface CourseCardProps {
-  courseName: string;
+  courseName?: string;
+  title?: string;
   progress: number;
   imageSource: any;
   onPress: () => void;
@@ -19,38 +21,45 @@ interface CourseCardProps {
 
 const CourseCard: React.FC<CourseCardProps> = ({
   courseName,
+  title,
   progress,
   imageSource,
   onPress,
 }) => {
+  const displayTitle = courseName || title || '';
+
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-      activeOpacity={0.9}
-    >
-      {/* Image Section */}
-      <View style={styles.imageContainer}>
-        <Image source={imageSource} style={styles.image} />
-      </View>
-
-      {/* Content Section */}
-      <View style={styles.contentContainer}>
-        <Text style={styles.courseTitle}>{courseName}</Text>
-
-        {/* Progress Bar */}
-        <View style={styles.progressBarContainer}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+    <TouchableWithoutFeedback onPress={onPress}>
+      <View style={styles.card}>
+        {/* Image Section */}
+        <View style={styles.imageContainer}>
+          <Image source={imageSource} style={styles.image} />
         </View>
 
-        <Text style={styles.progressText}>{progress}% completed</Text>
+        {/* Content Section */}
+        <View style={styles.contentContainer}>
+          <Text style={styles.courseTitle}>{displayTitle}</Text>
 
-        {/* Continue Button */}
-        <TouchableOpacity style={styles.button} onPress={onPress}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </TouchableOpacity>
+          {/* Progress Bar */}
+          <View style={styles.progressBarContainer}>
+            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          </View>
+
+          <Text style={styles.progressText}>{progress}% completed</Text>
+
+          {/* Continue Button */}
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={onPress}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.buttonText}>
+              {progress === 100 ? 'Revisit' : progress > 0 ? 'Continue' : 'Play'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </TouchableOpacity>
+    </TouchableWithoutFeedback>
   );
 };
 

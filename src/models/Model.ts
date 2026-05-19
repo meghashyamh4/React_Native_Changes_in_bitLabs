@@ -173,7 +173,7 @@ export type RootStackParamList = {
   FeedbackFormsList: undefined;
   FeedbackFormDetails: { formId: number; title: string };
   LMSMainPage: undefined;
-  ScormPlayer: { url: string; progress: number; courseId: number };
+  ScormPlayer: { url?: string; progress: number; courseId: number; courseName: string };
 };
 
 // Define the type for the test data
