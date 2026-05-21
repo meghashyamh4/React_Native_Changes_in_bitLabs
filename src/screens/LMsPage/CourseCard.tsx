@@ -29,36 +29,35 @@ const CourseCard: React.FC<CourseCardProps> = ({
   const displayTitle = courseName || title || '';
 
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
-      <View style={styles.card}>
-        {/* Image Section */}
-        <View style={styles.imageContainer}>
-          <Image source={imageSource} style={styles.image} />
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
+      {/* Image Section */}
+      <View style={styles.imageContainer}>
+        <Image source={imageSource} style={styles.image} />
+      </View>
+
+      {/* Content Section */}
+      <View style={styles.contentContainer}>
+        <Text style={styles.courseTitle}>{displayTitle}</Text>
+
+        {/* Progress Bar */}
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
 
-        {/* Content Section */}
-        <View style={styles.contentContainer}>
-          <Text style={styles.courseTitle}>{displayTitle}</Text>
+        <Text style={styles.progressText}>{progress}% completed</Text>
 
-          {/* Progress Bar */}
-          <View style={styles.progressBarContainer}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
-          </View>
-
-          <Text style={styles.progressText}>{progress}% completed</Text>
-
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={onPress}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonText}>
-              {progress > 0 && progress < 100 ? 'Continue' : 'Play'}
-            </Text>
-          </TouchableOpacity>
+        {/* Action Button Indicator */}
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>
+            {progress === 100 ? 'Revisit' : progress > 0 ? 'Continue' : 'Play'}
+          </Text>
         </View>
       </View>
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 };
 

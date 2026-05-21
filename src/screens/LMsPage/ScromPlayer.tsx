@@ -77,7 +77,10 @@ const ScormPlayer = () => {
 
   // Refs to avoid stale closures in callbacks
   const lastVisitedRef = useRef<number>(0);
+  const [activeSlide, setActiveSlide] = useState(1);
   const activeSlideRef = useRef<number>(1);
+  activeSlideRef.current = activeSlide;
+  const [visitedSlides, setVisitedSlides] = useState<Set<string>>(new Set());
   const totalCountRef = useRef<number>(0);
   totalCountRef.current = totalCount;
   const topicProgressRef = useRef<Record<number, number>>({});
@@ -104,13 +107,16 @@ const ScormPlayer = () => {
     try {
       // In Articulate Storyline, suspend_data contains a bitstring (0s and 1s) representing slide progress.
       // It is often preceded by 'u' (e.g. '2u101000...')
-      const matchU = data.match(/u([01]{2,})/);
+      // We match all alphanumeric characters after 'u' and strictly verify they contain only '0' and '1'.
+      const matchU = data.match(/u([0-9a-zA-Z]+)/);
       if (matchU) {
-        const bitstring = matchU[1];
-        return {
-          visited: bitstring.split('').filter(c => c === '1').length,
-          total: bitstring.length
-        };
+        const segment = matchU[1];
+        if (/^[01]+$/.test(segment)) {
+          return {
+            visited: segment.split('').filter(c => c === '1').length,
+            total: segment.length
+          };
+        }
       }
 
       // Fallback: match any sequence of 0s and 1s of length >= 2 ONLY if it spans the entire string
@@ -174,6 +180,10 @@ const ScormPlayer = () => {
     const idx = selectedTopicRef.current;
     const existing = topicProgressRef.current[idx] || 0;
 
+    // Log slide number and count clearly to the console
+    console.log(`Slide Number: ${activeSlideRef.current}`);
+    console.log(`Slide Count: ${finalTotal}`);
+
     // Slide transition logging
     if (visited > lastVisitedRef.current) {
       console.log('----------------------------------------');
@@ -215,11 +225,34 @@ const ScormPlayer = () => {
       const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
       const rawData = await AsyncStorage.getItem(progressKey);
 
+      let savedVisited = 0;
+      let savedTotal = 10;
+
       if (rawData) {
         const data = JSON.parse(rawData);
         const visited = typeof data.visited === "number" ? data.visited : data.visited?.length || 0;
-        const total = data.total || visited || 1;
+        const total = data.total || visited || 10;
+        savedVisited = visited;
+        savedTotal = total;
         updateProgressState(visited, total);
+      }
+
+      // 1.5 Load visited slides Set
+      const visitedSlidesKey = `visited_slides_${courseId}_topic_${idx}`;
+      const savedVisitedSlides = await AsyncStorage.getItem(visitedSlidesKey);
+      if (savedVisitedSlides) {
+        const parsed = JSON.parse(savedVisitedSlides);
+        if (Array.isArray(parsed)) {
+          setVisitedSlides(new Set(parsed));
+          // If we had no cached progress or visited is 0, we can use the visited slides count
+          if (savedVisited === 0 && parsed.length > 0) {
+            savedVisited = parsed.length;
+            const finalTotal = Math.max(savedTotal, savedVisited);
+            updateProgressState(savedVisited, finalTotal);
+          }
+        }
+      } else {
+        setVisitedSlides(new Set());
       }
 
       // 2. Load detailed SCORM data for resumption
@@ -228,6 +261,15 @@ const ScormPlayer = () => {
       if (savedScormData) {
         const parsedData = JSON.parse(savedScormData);
         setScormData(parsedData);
+
+        // Restore active slide from lesson_location
+        if (parsedData['cmi.core.lesson_location']) {
+          const loc = parsedData['cmi.core.lesson_location'];
+          const matchNum = loc.match(/\d+/);
+          if (matchNum) {
+            setActiveSlide(parseInt(matchNum[0], 10));
+          }
+        }
 
         // Inject into WebView if it's already loaded
         const injectScript = `
@@ -349,13 +391,15 @@ const ScormPlayer = () => {
       // Reset slide tracking for this topic
       lastVisitedRef.current = 0;
       activeSlideRef.current = 1;
+      setActiveSlide(1);
+      setVisitedSlides(new Set());
 
       // 1. Fetch manifest to get real subtopic count
       let subtopicCount = 0;
       if (currentUrl && currentUrl.startsWith('http')) {
         subtopicCount = await ScormService.countSubtopicsFromUrl(currentUrl);
       }
-      const finalTotal = subtopicCount > 1 ? subtopicCount : (totalCount > 1 ? totalCount : 10);
+      const finalTotal = subtopicCount > 1 ? subtopicCount : (totalCount > 1 ? totalCount : 0);
       if (!cancelled) {
         setTotalCount(finalTotal);
         totalCountRef.current = finalTotal;
@@ -370,12 +414,14 @@ const ScormPlayer = () => {
         const dbProgress = topicProgressRef.current[idx] || 0;
         const progressKey = `articulate_course_${courseId}_topic_${idx}_progress`;
         const scormKey = `scorm_data_${courseId}_topic_${idx}`;
+        const visitedSlidesKey = `visited_slides_${courseId}_topic_${idx}`;
 
         if (dbProgress === 0) {
           // Database says progress is 0. Clear any local cache to allow a clean reset!
           console.log(`🧹 [SCORM] Database progress is 0. Clearing local cache for topic ${idx}`);
           await AsyncStorage.removeItem(progressKey).catch(() => { });
           await AsyncStorage.removeItem(scormKey).catch(() => { });
+          await AsyncStorage.removeItem(visitedSlidesKey).catch(() => { });
         } else {
           // Database has progress > 0. Check local cache.
           visited = Math.round((dbProgress / 100) * finalTotal);
@@ -391,6 +437,19 @@ const ScormPlayer = () => {
             if (cachedProgress > dbProgress) {
               visited = cv;
               total = ct;
+            }
+          }
+
+          // Load visited slides Set
+          const savedVisited = await AsyncStorage.getItem(visitedSlidesKey);
+          if (savedVisited) {
+            const parsed = JSON.parse(savedVisited);
+            if (Array.isArray(parsed) && !cancelled) {
+              setVisitedSlides(new Set(parsed));
+              if (visited === 0 && parsed.length > 0) {
+                visited = parsed.length;
+                total = Math.max(total, visited);
+              }
             }
           }
         }
@@ -424,8 +483,19 @@ const ScormPlayer = () => {
 
         if (Object.keys(activeScormData).length > 0 && !cancelled) {
           setScormData(activeScormData);
+          if (activeScormData['cmi.core.lesson_location']) {
+            const loc = activeScormData['cmi.core.lesson_location'];
+            const matchNum = loc.match(/\d+/);
+            if (matchNum) {
+              const activeSlideNum = parseInt(matchNum[0], 10);
+              setActiveSlide(activeSlideNum);
+              activeSlideRef.current = activeSlideNum;
+            }
+          }
         } else if (dbProgress === 0 && !cancelled) {
           setScormData({});
+          setActiveSlide(1);
+          activeSlideRef.current = 1;
         }
 
         if (!cancelled) {
@@ -521,78 +591,153 @@ const ScormPlayer = () => {
         }, 2000);
       });
       
-      // Enhanced SCORM API implementation
-      window.API = {
+      // Unified SCORM 1.2 / 2004 API implementation
+      var scormAPI = {
         LMSInitialize: function() {
           isInitialized = true;
-          console.log('SCORM API Initialized');
-          // Use restored data if available
+          console.log('SCORM 1.2 API Initialized');
           if (window.scormData) {
             scormData = Object.assign(scormData, window.scormData);
           }
           return "true";
         },
+        Initialize: function() {
+          return scormAPI.LMSInitialize();
+        },
 
         LMSSetValue: function(key, value) {
           if (!isInitialized) return "false";
-          
           scormData[key] = value;
           console.log('SCORM SetValue:', key, value);
-          
-          // Send data to React Native
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(
-              JSON.stringify({ type: 'setValue', key, value })
+              JSON.stringify({ type: 'setValue', key: key, value: value })
             );
           }
-          
           return "true";
+        },
+        SetValue: function(key, value) {
+          return scormAPI.LMSSetValue(key, value);
         },
 
         LMSGetValue: function(key) {
           if (!isInitialized) return "";
-          const value = scormData[key] || "";
-          console.log('SCORM GetValue:', key, value);
-          return value;
+          var val = scormData[key] || "";
+          console.log('SCORM GetValue:', key, val);
+          return val;
+        },
+        GetValue: function(key) {
+          return scormAPI.LMSGetValue(key);
         },
 
         LMSCommit: function() {
           if (!isInitialized) return "false";
           console.log('SCORM Commit');
-          
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(
               JSON.stringify({ type: 'commit', data: scormData })
             );
           }
-          
           return "true";
+        },
+        Commit: function() {
+          return scormAPI.LMSCommit();
         },
 
         LMSFinish: function() {
           if (!isInitialized) return "false";
           console.log('SCORM Finish');
-          
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(
               JSON.stringify({ type: 'finish', data: scormData })
             );
           }
-          
           return "true";
+        },
+        Finish: function() {
+          return scormAPI.LMSFinish();
+        },
+        Terminate: function() {
+          return scormAPI.LMSFinish();
         },
 
         LMSGetLastError: function() {
-          return isInitialized ? "0" : "101"; // 101 = Not initialized
+          return isInitialized ? "0" : "101";
+        },
+        GetLastError: function() {
+          return scormAPI.LMSGetLastError();
+        },
+
+        LMSGetErrorString: function(errorCode) {
+          return "No error";
+        },
+        GetErrorString: function(errorCode) {
+          return "No error";
         },
 
         LMSGetDiagnostic: function(errorCode) {
-          return errorCode === "101" ? "API not initialized" : "No error";
+          return "No error";
+        },
+        GetDiagnostic: function(errorCode) {
+          return "No error";
         }
       };
 
-      // Also provide API_1484_11 for older SCORM versions
-      window.API_1484_11 = window.API;
+      window.API = scormAPI;
+      window.API_1484_11 = scormAPI;
+
+      // Smart window.GetPlayer hook to intercept Articulate custom variables and trigger scripts
+      (function() {
+        var originalGetPlayer = window.GetPlayer;
+        window.GetPlayer = function() {
+          var player = null;
+          if (originalGetPlayer) {
+            player = originalGetPlayer();
+          } else if (window.g_player) {
+            player = window.g_player;
+          }
+          
+          if (!player) {
+            for (var i = 0; i < window.frames.length; i++) {
+              try {
+                if (window.frames[i].GetPlayer) {
+                  player = window.frames[i].GetPlayer();
+                  break;
+                }
+              } catch(e) {}
+            }
+          }
+          
+          if (player) {
+            if (player.SetVar && !player.SetVar.isIntercepted) {
+              var originalSetVar = player.SetVar;
+              player.SetVar = function(name, val) {
+                console.log('Intercepted player.SetVar:', name, val);
+                if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(
+                    JSON.stringify({ type: 'setValue', key: 'player_var_' + name, value: val })
+                  );
+                }
+                return originalSetVar.apply(player, arguments);
+              };
+              player.SetVar.isIntercepted = true;
+            }
+            return player;
+          }
+          
+          return {
+            GetVar: function(name) { return window.scormData ? window.scormData[name] : ""; },
+            SetVar: function(name, val) { 
+              if (window.scormData) window.scormData[name] = val; 
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(
+                  JSON.stringify({ type: 'setValue', key: 'player_var_' + name, value: val })
+                );
+              }
+            }
+          };
+        };
+      })();
       
       console.log('SCORM API injected successfully');
     })();
@@ -606,11 +751,44 @@ const ScormPlayer = () => {
         const { key, value } = data;
         console.log(`🔍 [SCORM] ${key} = "${value}"`);
 
-        // 1. cmi.core.lesson_location → current slide identifier (strictly reserved for SCORM resumption location, NOT completion progress)
+        // 1. cmi.core.lesson_location → current slide identifier
         if (key === 'cmi.core.lesson_location') {
           console.log(`📍 lesson_location → active subtopic set to: "${value}"`);
-          // Storing the lesson location for resumption.
-          // We strictly avoid parsing it or using it to update progress to prevent arbitrary string values (e.g. hash identifiers containing digits) from corrupting the subtopic count or visited count.
+          
+          let slideNum = 1;
+          const matchNum = value.match(/\d+/);
+          if (matchNum) {
+            slideNum = parseInt(matchNum[0], 10);
+          }
+          setActiveSlide(slideNum);
+          activeSlideRef.current = slideNum;
+          console.log(`Slide Number: ${slideNum}`);
+
+          const idx = selectedTopicRef.current;
+          const visitedSlidesKey = `visited_slides_${courseId}_topic_${idx}`;
+
+          setVisitedSlides(prev => {
+            const updated = new Set(prev);
+            updated.add(value);
+            const array = Array.from(updated);
+            AsyncStorage.setItem(visitedSlidesKey, JSON.stringify(array)).catch(() => { });
+
+            // If we don't have a valid parsed suspend_data progress (or if suspend_data is null),
+            // we use the size of visitedSlides to determine the visited count!
+            const total = totalCountRef.current || 10;
+            const visitedCountVal = updated.size;
+
+            // Dynamically adjust total count if the highest slide number or visited size exceeds totalCount
+            const dynamicTotal = Math.max(total, visitedCountVal, slideNum);
+            
+            // Trigger progress state update
+            updateProgressState(visitedCountVal, dynamicTotal);
+            setVisitedCount(visitedCountVal);
+            setTotalCount(dynamicTotal);
+            totalCountRef.current = dynamicTotal;
+
+            return updated;
+          });
         }
 
         // 2. cmi.suspend_data → bitstring: count 1s = visited subtopics
@@ -701,7 +879,14 @@ const ScormPlayer = () => {
           >
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.heading}>{courseName}</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.heading}>{courseName}</Text>
+            {totalCount > 0 && (
+              <Text style={styles.subHeading}>
+                Slide: {activeSlide} / {totalCount} • Visited: {visitedCount}
+              </Text>
+            )}
+          </View>
           <View style={styles.navBackButtonPlaceholder} />
         </View>
       </View>
@@ -848,11 +1033,22 @@ const styles = StyleSheet.create({
   navBackButtonPlaceholder: {
     width: 32,
   },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   heading: {
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-Bold',
     color: '#000',
-    flex: 1,
+    textAlign: 'center',
+  },
+  subHeading: {
+    fontSize: 12,
+    fontFamily: 'PlusJakartaSans-Regular',
+    color: '#666',
+    marginTop: 2,
     textAlign: 'center',
   },
   toggleButton: {

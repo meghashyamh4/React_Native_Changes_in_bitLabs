@@ -57,15 +57,17 @@ const LMSMainPage = () => {
         console.log('[LMS] Progress API response:', progressResponse);
 
         const dataArray = progressResponse?.data?.data || progressResponse?.data || progressResponse;
+        console.log('[LMS] Resolved progress dataArray:', dataArray);
         if (dataArray && Array.isArray(dataArray)) {
           // Update courses with progress data from database
-          setCourses(prevCourses =>
-            prevCourses.map(course => {
+          setCourses(prevCourses => {
+            const updated = prevCourses.map(course => {
               const courseProgress = dataArray.find(
                 (progress: any) => 
                   Number(progress.courseId || progress.course_id) === Number(course.id) ||
                   (progress.courseName || progress.course_name || '').toLowerCase().trim() === course.name.toLowerCase().trim()
               );
+              console.log(`[LMS] Matching progress for course "${course.name}" (ID: ${course.id}):`, courseProgress);
               const progVal = courseProgress
                 ? (courseProgress.overallProgress !== undefined 
                     ? Number(courseProgress.overallProgress) 
@@ -73,12 +75,15 @@ const LMSMainPage = () => {
                         ? Number(courseProgress.overall_progress) 
                         : 0))
                 : 0;
+              console.log(`[LMS] Course "${course.name}" calculated progress: ${progVal}%`);
               return {
                 ...course,
                 progress: progVal
               };
-            })
-          );
+            });
+            console.log('[LMS] Final updated courses array:', updated);
+            return updated;
+          });
         }
       } catch (err: any) {
         console.error('[LMS] Error fetching progress:', err);
