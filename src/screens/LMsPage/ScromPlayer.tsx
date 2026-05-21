@@ -18,21 +18,21 @@ const COURSE_DATA: Record<string, any[]> = {
     { topic: "CSS Part 2", videos: [{ title: "Advanced CSS Concepts", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/csspart2_topic4/index_lms.html" }] },
     { topic: "HTML Forms", videos: [{ title: "Creating Forms in HTML", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/HTML%20FORMS_topic5/index_lms.html" }] },
   ],
-  // "python": [
-  //   { topic: "Introduction to python", videos: [{ title: "What is a python?", url: "/python for beginners/Introduction to Python_topic1/index_lms.html" }] },
-  //   { topic: "Python variables and data types", videos: [{ title: "Variables and Data Types", url: "/python for beginners/python variables and data types_topic2/index_lms.html" }] },
-  //   { topic: "Python Operators", videos: [{ title: "Operators", url: "/python for beginners/Python Operators_topic3/index_lms.html" }] },
-  //   { topic: "Python conditional statements", videos: [{ title: "Conditional Statements", url: "/python for beginners/Python conditional statements_topic4/index_lms.html" }] },
-  //   { topic: "Python Loops", videos: [{ title: "Loops", url: "/python for beginners/Python Loops_topic5/index_lms.html" }] },
-  //   { topic: "Python Data Structures Part 1", videos: [{ title: "Data Structures Part 1", url: "/python for beginners/Python Data Structures Part 1_topic6/index_lms.html" }] },
-  //   { topic: "Python Data Structures Part 2", videos: [{ title: "Data Structures Part 2", url: "/python for beginners/Python Data Structures Part 2_topic7/index_lms.html" }] },
-  //   { topic: "Python Data Structures Part 3", videos: [{ title: "Data Structures Part 3", url: "/python for beginners/Python Data Structures Part 3_topic8/index_lms.html" }] },
-  //   { topic: "Python functions", videos: [{ title: "Functions", url: "/python for beginners/python functions_topic9/index_lms.html" }] },
-  //   { topic: "Python modules", videos: [{ title: "Modules", url: "/python for beginners/python modules_topic10/index_lms.html" }] },
-  //   { topic: "Python OOPS", videos: [{ title: "OOPS concepts", url: "/python for beginners/Python OOPS_topic11/index_lms.html" }] },
-  //   { topic: "Python Constructors", videos: [{ title: "Constructors", url: "/python for beginners/Python Constructors_topic12/index_lms.html" }] },
-  //   { topic: "Python Inheritence", videos: [{ title: "Inheritence", url: "/python for beginners/Python Inheritence_topic13/index_lms.html" }] },
-  // ],
+  "python": [
+    { topic: "Introduction to python", videos: [{ title: "What is a python?", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Introduction+to+Python_topic1/index_lms.html" }] },
+    { topic: "Python variables and data types", videos: [{ title: "Variables and Data Types", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Variables+and+Data+Types_topic2/index_lms.html" }] },
+    { topic: "Python Operators", videos: [{ title: "Operators", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Operators_topic3/index_lms.html" }] },
+    { topic: "Python conditional statements", videos: [{ title: "Conditional Statements", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Conditional+Statements_topic4/index_lms.html" }] },
+    { topic: "Python Loops", videos: [{ title: "Loops", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Loop+Control+Statements_topic5/index_lms.html" }] },
+    { topic: "Python Data Structures Part 1", videos: [{ title: "Data Structures Part 1", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Data+Structures++Part+1_topic6/index_lms.html" }] },
+    { topic: "Python Data Structures Part 2", videos: [{ title: "Data Structures Part 2", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Data+Structures++Part+2_topic7/index_lms.html" }] },
+    { topic: "Python Data Structures Part 3", videos: [{ title: "Data Structures Part 3", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Data+Structures++Part+3_(Strings)_topic8/index_lms.html" }] },
+    { topic: "Python functions", videos: [{ title: "Functions", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Functions_topic9/index_lms.html" }] },
+    { topic: "Python modules", videos: [{ title: "Modules", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Modules_topic10/index_lms.html" }] },
+    { topic: "Python OOPS", videos: [{ title: "OOPS concepts", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Object+Oriented+Programming_topic11/index_lms.html" }] },
+    { topic: "Python Constructors", videos: [{ title: "Constructors", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Constructors_topic12/index_lms.html" }] },
+    { topic: "Python Inheritence", videos: [{ title: "Inheritence", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Python+Inheritance_topic13/index_lms.html" }] },
+  ],
   // "java": [
   //   { topic: "Java Basics", videos: [{ title: "Java Course", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/How+to+Set+Goals_web+2/story.html" }] },
   // ],
@@ -881,11 +881,11 @@ const ScormPlayer = () => {
           </TouchableOpacity>
           <View style={styles.titleContainer}>
             <Text style={styles.heading}>{courseName}</Text>
-            {totalCount > 0 && (
+            {/* {totalCount > 0 && (
               <Text style={styles.subHeading}>
                 Slide: {activeSlide} / {totalCount} • Visited: {visitedCount}
               </Text>
-            )}
+            )} */}
           </View>
           <View style={styles.navBackButtonPlaceholder} />
         </View>

@@ -19,12 +19,12 @@ const LMSMainPage = () => {
       progress: 0,
       image: require("../../assests/Images/backgrounds/html&css.png"),
     },
-    // {
-    //   id: 2,
-    //   name: "Python", 
-    //   progress: 45,
-    //   image: require('../assets/python.jfif'),
-    // },
+    {
+      id: 2,
+      name: "Python", 
+      progress: 45,
+      image: require('../../assests/Images/backgrounds/python.png'),
+    },
     // {
     //   id: 3,
     //   name: "JavaScript",
