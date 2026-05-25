@@ -21,7 +21,7 @@ const LMSMainPage = () => {
     },
     {
       id: 2,
-      name: "Python", 
+      name: "Python",
       progress: 45,
       image: require('../../assests/Images/backgrounds/python.png'),
     },
@@ -63,17 +63,17 @@ const LMSMainPage = () => {
           setCourses(prevCourses => {
             const updated = prevCourses.map(course => {
               const courseProgress = dataArray.find(
-                (progress: any) => 
+                (progress: any) =>
                   Number(progress.courseId || progress.course_id) === Number(course.id) ||
                   (progress.courseName || progress.course_name || '').toLowerCase().trim() === course.name.toLowerCase().trim()
               );
               console.log(`[LMS] Matching progress for course "${course.name}" (ID: ${course.id}):`, courseProgress);
               const progVal = courseProgress
-                ? (courseProgress.overallProgress !== undefined 
-                    ? Number(courseProgress.overallProgress) 
-                    : (courseProgress.overall_progress !== undefined 
-                        ? Number(courseProgress.overall_progress) 
-                        : 0))
+                ? (courseProgress.overallProgress !== undefined
+                  ? Number(courseProgress.overallProgress)
+                  : (courseProgress.overall_progress !== undefined
+                    ? Number(courseProgress.overall_progress)
+                    : 0))
                 : 0;
               console.log(`[LMS] Course "${course.name}" calculated progress: ${progVal}%`);
               return {
@@ -177,8 +177,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },

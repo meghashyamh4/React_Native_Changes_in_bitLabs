@@ -108,8 +108,8 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
   const currentTimeRef = useRef(0);
 
   const videoSource = useMemo(() => {
-  return currentUrl ? { uri: currentUrl } : null;
-}, [currentUrl]);
+    return currentUrl ? { uri: currentUrl } : null;
+  }, [currentUrl]);
 
   const videoRef = useRef<any>();
   const videoTrackedRef = useRef<string | null>(null);
@@ -230,16 +230,16 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
         if (matched) {
           trackVideoWatch(userId, matched.videoId, userToken);
           console.log("📊 [Analytics] Tracking MOBILE-SHORTS event on video watch for user:", userId);
-          
+
           refreshScore?.();
         }
       }
     }
   };
 
- /* ===========================
-     Video Controllers
-  =========================== */
+  /* ===========================
+      Video Controllers
+   =========================== */
   //   const seekBackward = () => {
   //     const liveTime = progress?.currentTime || 0;
   //   const newTime = Math.max(liveTime - 10,0);
@@ -257,13 +257,13 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
 
   // };
 
-//  const onSeek = (value : number) => {
-//     setIsSeeking(false);
-//     videoRef.current?.seek(value);
-//     setCurrentTime(value);
-//   };
+  //  const onSeek = (value : number) => {
+  //     setIsSeeking(false);
+  //     videoRef.current?.seek(value);
+  //     setCurrentTime(value);
+  //   };
 
-   const formatTime = (seconds: number) => {
+  const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds) || seconds < 0) return "0:00";
     const totalSeconds = Math.floor(seconds);
     const mins = Math.floor(totalSeconds / 60);
@@ -382,7 +382,7 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
                 transform: [{ scale: fsScale }],
               }}
             >
-              {videoSource&& (
+              {videoSource && (
                 <Video
                   ref={videoRef}
                   source={videoSource}
@@ -390,19 +390,18 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
                   resizeMode="contain"
                   paused={paused}
                   muted={muted}
-                  onLoad={(d) => 
-                      {
-                      setDuration(d.duration)
-                    }}
+                  onLoad={(d) => {
+                    setDuration(d.duration)
+                  }}
                   onProgress={(x: any) => {
-                    {handleProgress(x)}
+                    { handleProgress(x) }
                     // Sync check with ref to prevent flickering during/after seek
                     if (isSeekingRef.current) return;
 
                     // Update duration if we get a valid one
                     if (x.seekableDuration > 0 && x.seekableDuration < 1e9 && x.seekableDuration !== duration) {
                       setDuration(x.seekableDuration);
-                      
+
                     }
 
                     const time = Math.max(0, x.currentTime || 0);
@@ -417,14 +416,21 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
                 />
               )}
 
-              {/* <Pressable style={StyleSheet.absoluteFill} onPress={() => setPaused(!paused)} /> */}
+              {/* Pause overlay with slight blur/dim effect */}
+              {paused && (
+                <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }]} pointerEvents="none">
+                  <Icon name="pause-circle-filled" size={80} color="rgba(255,255,255,0.8)" />
+                </View>
+              )}
+
+              <Pressable style={StyleSheet.absoluteFill} onPress={() => setPaused(!paused)} />
 
               <View style={styles.fsControls}>
                 <TouchableOpacity onPress={closeVideo} style={styles.fsCloseBtn}>
                   <Icon name="close" size={28} color="#fff" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => {setMuted(!muted);}} style={styles.fsCloseBtn}>
+                <TouchableOpacity onPress={() => { setMuted(!muted); }} style={styles.fsCloseBtn}>
                   <Icon
                     name={muted ? "volume-off" : "volume-up"}
                     size={28}
@@ -466,7 +472,7 @@ const VerifiedVideosScreen: React.FC<{ navigation: any; route?: any }> = ({
                     videoRef.current?.seek(val);
                     setCurrentTime(val);
                     setProgress(val);
-                    
+
                     // Delay unlocking to ensure player has seeked
                     setTimeout(() => {
                       isSeekingRef.current = false;
@@ -663,20 +669,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "PlusJakartaSans-Bold",
   },
-  buttomSlider:{
+  buttomSlider: {
     position: 'absolute',
     bottom: 55,
     width: '95%',
     alignSelf: 'center',
-    color:'white',
-    backgroundColor:'rgba(0,0,0,0.5)',
-    height :50,
+    color: 'white',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    height: 50,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    borderRadius:25,
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center',  
+    borderRadius: 25,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   }
 
 });

@@ -64,7 +64,7 @@ const ScormPlayer = () => {
   // Sidebar state
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
-  const slideAnim = useRef(new Animated.Value(-300)).current;
+  const slideAnim = useRef(new Animated.Value(300)).current;
 
   // Topic-level progress state
   const [topicProgress, setTopicProgress] = useState<Record<number, number>>({});
@@ -92,7 +92,7 @@ const ScormPlayer = () => {
   const currentUrl = courseContent[selectedTopicIndex]?.videos[0]?.url || initialUrl;
 
   const toggleSidebar = () => {
-    const toValue = sidebarVisible ? -300 : 0;
+    const toValue = sidebarVisible ? 300 : 0;
     Animated.timing(slideAnim, {
       toValue,
       duration: 300,
@@ -881,13 +881,13 @@ const ScormPlayer = () => {
           </TouchableOpacity>
           <View style={styles.titleContainer}>
             <Text style={styles.heading}>{courseName}</Text>
-            {/* {totalCount > 0 && (
-              <Text style={styles.subHeading}>
-                Slide: {activeSlide} / {totalCount} • Visited: {visitedCount}
-              </Text>
-            )} */}
           </View>
-          <View style={styles.navBackButtonPlaceholder} />
+          <TouchableOpacity
+            onPress={toggleSidebar}
+            style={styles.navBackButton}
+          >
+            <Ionicons name="menu" size={24} color="#000" />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -938,10 +938,7 @@ const ScormPlayer = () => {
         onHttpError={(error) => console.error('SCORM HTTP Error:', error)}
       />
 
-      {/* Sidebar Toggle Button */}
-      <TouchableOpacity style={styles.toggleButton} onPress={toggleSidebar}>
-        <Ionicons name={sidebarVisible ? "close" : "menu"} size={28} color="#fff" />
-      </TouchableOpacity>
+
 
       {/* Backdrop for closing sidebar */}
       {sidebarVisible && (
@@ -1063,17 +1060,17 @@ const styles = StyleSheet.create({
   sidebar: {
     position: 'absolute',
     top: 0,
-    left: 0,
+    right: 0,
     bottom: 0,
     width: 300,
     backgroundColor: '#fff',
     zIndex: 999,
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
+    shadowOffset: { width: -2, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 10,
-    paddingTop: 140,
+    paddingTop: 60,
   },
   backdrop: {
     position: 'absolute',
