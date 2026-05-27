@@ -8,9 +8,12 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import ProgressBar from '@components/progessBar/ProgressBar';
-import DropDownPicker from 'react-native-dropdown-picker';
+import { Dropdown, MultiSelect } from 'react-native-element-dropdown';
 import LinearGradient from 'react-native-linear-gradient';
 import { ProfileModel } from '@services/step/stepServices';
 import { useAuth } from '@context/Authcontext';
@@ -168,42 +171,9 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
   const [specialization, setSpecialization] = useState<string>(formData.specialization);
   const [qualification, setQualification] = useState<string>(formData.qualification);
 
-  const [openQualificationDropdown, setOpenQualificationDropdown] = useState(false);
-  const [openSpecializationDropdown, setOpenSpecializationDropdown] = useState(false);
-
-  const [openSkillsDropdown, setOpenSkillsDropdown] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>(formData.skills);
-
-  const [openLocationDropdown, setOpenLocationDropdown] = useState(false);
   const [selectedLocations, setSelectedLocations] = useState<string[]>(formData.preferredLocation);
   const [experience, setExperience] = useState(formData.experience);
-
-
-  // Handler functions to ensure only one dropdown opens at a time
-  const handleOpenQualification = () => {
-    setOpenLocationDropdown(false);
-    setOpenSkillsDropdown(false);
-    setOpenSpecializationDropdown(false);
-    setOpenExperienceDropdown(false);
-  };
-  const handleOpenSpecialization = () => {
-    setOpenLocationDropdown(false);
-    setOpenSkillsDropdown(false);
-    setOpenQualificationDropdown(false);
-    setOpenExperienceDropdown(false);
-  };
-  const handleOpenSkills = () => {
-    setOpenLocationDropdown(false);
-    setOpenQualificationDropdown(false);
-    setOpenSpecializationDropdown(false);
-    setOpenExperienceDropdown(false);
-  };
-  const handleOpenLocation = () => {
-    setOpenQualificationDropdown(false);
-    setOpenSkillsDropdown(false);
-    setOpenSpecializationDropdown(false);
-    setOpenExperienceDropdown(false);
-  };
 
   useEffect(() => {
     setFormData(prev => ({
@@ -457,193 +427,189 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
       formData: formData,
     });
   };
-  const isAnyDropdownOpen =
-    openQualificationDropdown ||
-    openSpecializationDropdown ||
-    openSkillsDropdown ||
-    openLocationDropdown ||
-    openExperienceDropdown;
 
   return (
-    <View style={styles.screen}>
-      <ScrollView scrollEnabled={!isAnyDropdownOpen || !openLocationDropdown} style={styles.scrollView}>
-        <Image style={styles.logo} source={{ uri: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/bitlabs-skill-images/logo.png" }} />
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Image style={styles.logo} source={{ uri: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/bitlabs-skill-images/logo.png" }} />
 
-        {/* Container with overflow visible to prevent dropdown clipping */}
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.completeProfile}>Complete Your Profile</Text>
-            <Text style={styles.subHeader}>Fill the form fields to go next step</Text>
+      {/* Container with overflow visible to prevent dropdown clipping */}
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.completeProfile}>Complete Your Profile</Text>
+          <Text style={styles.subHeader}>Fill the form fields to go next step</Text>
+        </View>
+
+        <ProgressBar initialStep={currentStep} />
+
+        <ScrollView
+          scrollEnabled={false}
+          contentContainerStyle={styles.scrollView}
+          style={{ flex: 1 }}
+        >
+          {/* Qualification Dropdown */}
+          <View style={styles.dropdownWrapper}>
+            <Dropdown
+              style={styles.dropdown}
+              data={[
+                { label: 'B.Tech', value: 'B.Tech' },
+                { label: 'MCA', value: 'MCA' },
+                { label: 'Degree', value: 'Degree' },
+                { label: 'Intermediate', value: 'Intermediate' },
+                { label: 'Diploma', value: 'Diploma' },
+              ]}
+              labelField="label"
+              valueField="value"
+              value={qualification}
+              onChange={item => {
+                setQualification(item.value);
+                setErrors(prev => ({ ...prev, qualification: '' }));
+              }}
+              placeholder="*Qualification"
+              placeholderStyle={styles.placeholderText}
+              selectedTextStyle={styles.dropdownText}
+              itemTextStyle={styles.dropdownText}
+              containerStyle={styles.dropdownContainer}
+              search
+              searchPlaceholder="Search qualification..."
+              searchPlaceholderTextColor="#9ca3af"
+            />
+            {Boolean(errors.qualification) && <Text style={styles.errorText}>{errors.qualification}</Text>}
           </View>
 
-          <ProgressBar initialStep={currentStep} />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            {/* Qualification Dropdown - zIndex: 1000 */}
-            <View style={[styles.dropdownWrapper, { zIndex: 1000 }]}>
-              <DropDownPicker
-                open={openQualificationDropdown}
-                value={qualification}
-                items={[
-                  { label: 'B.Tech', value: 'B.Tech' },
-                  { label: 'MCA', value: 'MCA' },
-                  { label: 'Degree', value: 'Degree' },
-                  { label: 'Intermediate', value: 'Intermediate' },
-                  { label: 'Diploma', value: 'Diploma' },
-                ]}
-                setOpen={setOpenQualificationDropdown}
-                onOpen={handleOpenQualification}
-                setValue={value => {
-                  setQualification(value);
-                  setErrors(prev => ({ ...prev, qualification: '' })); // Clear the error if input is valid
-                }}
-                placeholder="*Qualification"
-                style={styles.dropdown}
-                dropDownContainerStyle={[styles.dropdownContainer, { zIndex: 1000 }]}
-                placeholderStyle={styles.placeholderText}
-                textStyle={styles.dropdownText}
-                listMode="SCROLLVIEW"
-                dropDownDirection="BOTTOM"
-                zIndex={1000}
-                zIndexInverse={1000}
-              />
-              {Boolean(errors.qualification) && <Text style={styles.errorText}>{errors.qualification}</Text>}
-            </View>
+          {/* Specialization Dropdown */}
+          <View style={styles.dropdownWrapper}>
+            <Dropdown
+              style={[styles.dropdown, !qualification && styles.disabledDropdown]}
+              data={getSpecializationOptions(qualification).map(spec => ({
+                label: spec,
+                value: spec,
+              }))}
+              labelField="label"
+              valueField="value"
+              value={specialization}
+              onChange={item => {
+                setSpecialization(item.value);
+                setErrors(prev => ({ ...prev, specialization: '' }));
+              }}
+              placeholder="*Specialization"
+              placeholderStyle={styles.placeholderText}
+              selectedTextStyle={styles.dropdownText}
+              itemTextStyle={styles.dropdownText}
+              containerStyle={styles.dropdownContainer}
+              search
+              searchPlaceholder="Search specialization..."
+              searchPlaceholderTextColor="#9ca3af"
+              disable={!qualification}
+            />
+            {Boolean(errors.specialization) && <Text style={styles.errorText}>{errors.specialization}</Text>}
+          </View>
 
-            {/* Specialization Dropdown - zIndex: 990 */}
-            <View style={[styles.dropdownWrapper, { zIndex: 990 }]}>
-              <DropDownPicker
-                open={openSpecializationDropdown}
-                listMode="SCROLLVIEW"
-                items={getSpecializationOptions(qualification).map(spec => ({
-                  label: spec,
-                  value: spec,
-                }))}
-                value={specialization}
-                setOpen={setOpenSpecializationDropdown}
-                onOpen={handleOpenSpecialization}
-                setValue={value => {
-                  setSpecialization(value);
-                  setErrors(prev => ({ ...prev, specialization: '' })); // Clear error dynamically
-                }}
-                placeholder="*Specialization"
-                disabled={!qualification} // Disable dropdown if qualification is not selected
-                style={styles.dropdown}
-                dropDownContainerStyle={[styles.dropdownContainer, { zIndex: 990 }]}
-                placeholderStyle={styles.placeholderText}
-                textStyle={styles.dropdownText}
-                dropDownDirection="BOTTOM"
-                zIndex={990}
-                zIndexInverse={990}
-              />
-              {Boolean(errors.specialization) && <Text style={styles.errorText}>{errors.specialization}</Text>}
-            </View>
-
-            {/* Skills Dropdown - zIndex: 900 */}
-            <View style={[styles.dropdownWrapper, { zIndex: 900 }]}>
-              <DropDownPicker
-                multiple={true}
-                listMode="SCROLLVIEW"
-                open={openSkillsDropdown}
-                value={selectedSkills}
-                items={skillOptions.map(skill => ({ label: skill, value: skill }))}
-                setOpen={setOpenSkillsDropdown}
-                onOpen={handleOpenSkills}
-                setValue={value => {
-                  setSelectedSkills(value);
-                  setErrors(prev => ({
-                    ...prev,
-                    skills: value.length > 0 ? '' : 'Skills are required.',
-                  })); // Clear error dynamically
-                }}
-                placeholder="*Skills"
-                style={styles.dropdown}
-                dropDownContainerStyle={[styles.dropdownContainer, { zIndex: 900 }]}
-                placeholderStyle={styles.placeholderText}
-                textStyle={styles.dropdownText}
-                dropDownDirection="BOTTOM"
-                zIndex={900}
-                zIndexInverse={900}
-                mode="BADGE"
-                showBadgeDot={false}
-              />
-              {Boolean(errors.skills) && <Text style={styles.errorText}>{errors.skills}</Text>}
-            </View>
-
-            {/* Location Dropdown - zIndex: 800 */}
-            <View style={[styles.dropdownWrapper, { zIndex: 800 }]}>
-              <DropDownPicker
-                multiple={true}
-                open={openLocationDropdown}
-                value={selectedLocations} // Array of selected locations
-                items={locationOptions.map(location => ({
-                  label: location,
-                  value: location,
-                }))}
-                setOpen={setOpenLocationDropdown}
-                onOpen={handleOpenLocation}
-                setValue={value => {
-                  setSelectedLocations(value);
-                  setErrors(prev => ({
-                    ...prev,
-                    preferredLocation: value.length > 0 ? '' : 'Preferred location is required.',
-                  })); // Clear error dynamically
-                }}
-                placeholder="*Preferred Locations"
-                style={styles.dropdown}
-                dropDownContainerStyle={[styles.dropdownContainer, { maxHeight: 150, zIndex: 800 }]}
-                placeholderStyle={styles.placeholderText}
-                textStyle={styles.dropdownText}
-                listMode="SCROLLVIEW"
-                dropDownDirection="BOTTOM"
-                zIndex={800}
-                zIndexInverse={800}
-                mode="BADGE"
-                showBadgeDot={false}
-              />
-              {Boolean(errors.preferredLocation) && (
-                <Text style={styles.errorText}>{errors.preferredLocation}</Text>
+          {/* Skills Dropdown */}
+          <View style={styles.dropdownWrapper}>
+            <MultiSelect
+              style={styles.dropdown}
+              data={skillOptions.map(skill => ({ label: skill, value: skill }))}
+              labelField="label"
+              valueField="value"
+              value={selectedSkills}
+              onChange={value => {
+                setSelectedSkills(value);
+                setErrors(prev => ({
+                  ...prev,
+                  skills: value.length > 0 ? '' : 'Skills are required.',
+                }));
+              }}
+              placeholder="*Skills"
+              placeholderStyle={styles.placeholderText}
+              selectedTextStyle={styles.dropdownText}
+              itemTextStyle={styles.dropdownText}
+              containerStyle={styles.dropdownContainer}
+              search
+              searchPlaceholder="Search skills..."
+              searchPlaceholderTextColor="#9ca3af"
+              renderSelectedItem={(item, unSelect) => (
+                <TouchableOpacity style={styles.selectedItem} onPress={() => unSelect && unSelect(item)}>
+                  <Text style={styles.selectedItemText}>{item.label}</Text>
+                  <AntDesign color="black" name="closecircle" size={17} />
+                </TouchableOpacity>
               )}
-            </View>
+            />
+            {Boolean(errors.skills) && <Text style={styles.errorText}>{errors.skills}</Text>}
           </View>
-          {/* Experience Dropdown - zIndex: 700 */}
-          <View style={[styles.dropdownWrapper, { zIndex: 700 }]}>
-            <DropDownPicker
-              listMode="SCROLLVIEW"
-              open={openExperienceDropdown}
-              value={experience}
-              items={Array.from({ length: 16 }, (_, i) => ({
+
+          {/* Location Dropdown */}
+          <View style={styles.dropdownWrapper}>
+            <MultiSelect
+              style={styles.dropdown}
+              data={locationOptions.map(location => ({
+                label: location,
+                value: location,
+              }))}
+              labelField="label"
+              valueField="value"
+              value={selectedLocations}
+              onChange={value => {
+                setSelectedLocations(value);
+                setErrors(prev => ({
+                  ...prev,
+                  preferredLocation: value.length > 0 ? '' : 'Preferred location is required.',
+                }));
+              }}
+              placeholder="*Preferred Locations"
+              placeholderStyle={styles.placeholderText}
+              selectedTextStyle={styles.dropdownText}
+              itemTextStyle={styles.dropdownText}
+              containerStyle={[styles.dropdownContainer, { maxHeight: 150 }]}
+              search
+              searchPlaceholder="Search location..."
+              searchPlaceholderTextColor="#9ca3af"
+              renderSelectedItem={(item, unSelect) => (
+                <TouchableOpacity style={styles.selectedItem} onPress={() => unSelect && unSelect(item)}>
+                  <Text style={styles.selectedItemText}>{item.label}</Text>
+                  <AntDesign color="black" name="closecircle" size={17} />
+                </TouchableOpacity>
+              )}
+            />
+            {Boolean(errors.preferredLocation) && (
+              <Text style={styles.errorText}>{errors.preferredLocation}</Text>
+            )}
+          </View>
+
+          {/* Experience Dropdown */}
+          <View style={styles.dropdownWrapper}>
+            <Dropdown
+              style={styles.dropdown}
+              data={Array.from({ length: 16 }, (_, i) => ({
                 label: `${i}`,
                 value: `${i}`,
               }))}
-              setOpen={setOpenExperienceDropdown}
-              onOpen={() => {
-                setOpenQualificationDropdown(false);
-                setOpenSpecializationDropdown(false);
-                setOpenSkillsDropdown(false);
-                setOpenLocationDropdown(false);
-              }}
-              setValue={value => {
-                const experienceValue = typeof value === 'function' ? value(experience) : value;
-                setExperience(experienceValue);
-                setFormData(prev => ({ ...prev, experience: experienceValue as string }));
+              labelField="label"
+              valueField="value"
+              value={experience}
+              onChange={item => {
+                setExperience(item.value);
+                setFormData(prev => ({ ...prev, experience: item.value }));
                 setErrors(prev => ({ ...prev, experience: '' }));
               }}
               placeholder="*Total Experience"
-              style={styles.dropdown}
-              dropDownContainerStyle={[styles.dropdownContainer, { zIndex: 700 }]}
               placeholderStyle={styles.placeholderText}
-              textStyle={styles.dropdownText}
-              dropDownDirection="BOTTOM"
-              zIndex={700}
-              zIndexInverse={700}
+              selectedTextStyle={styles.dropdownText}
+              itemTextStyle={styles.dropdownText}
+              containerStyle={styles.dropdownContainer}
+              search
+              searchPlaceholder="Search experience..."
+              searchPlaceholderTextColor="#9ca3af"
             />
             {Boolean(errors.experience) && (
               <Text style={styles.errorText}>{errors.experience}</Text>
             )}
           </View>
 
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <View style={styles.footer}>
         <View style={styles.buttonContainer}>
@@ -677,7 +643,7 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 const styles = StyleSheet.create({
@@ -697,12 +663,12 @@ const styles = StyleSheet.create({
   },
   // Container with overflow visible to prevent dropdown clipping
   container: {
+    flex: 1,
     width: '100%',
-    height: height * 1.05,
     padding: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
-    marginBottom: 40,
+    marginBottom: 0, // Leave room for absolute footer
     overflow: 'visible', // Critical: allows dropdowns to render outside container bounds
   },
   footer: {
@@ -793,19 +759,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     fontFamily: 'PlusJakartaSans-Bold',
     marginTop: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
   },
-  // Dropdown container style with absolute positioning and elevation for proper stacking
+  disabledDropdown: {
+    backgroundColor: '#E0E0E0',
+  },
+  // Dropdown container style for react-native-element-dropdown
   dropdownContainer: {
     borderWidth: 1,
     borderColor: '#E5E5E5',
     backgroundColor: '#F5F5F5',
-    position: 'absolute', // Critical: allows dropdown to overlay content
-    maxHeight: 200, // Prevents dropdown from being too tall
-    elevation: 10, // Android shadow/elevation for proper layering
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    maxHeight: 200,
+    borderRadius: 5,
   },
   placeholderText: {
     fontFamily: 'PlusJakartaSans-Medium',
@@ -816,11 +782,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'black',
   },
+  selectedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E5E5E5',
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  selectedItemText: {
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 14,
+    color: 'black',
+    marginRight: 5,
+  },
   // ScrollView with overflow visible to prevent dropdown clipping
   scrollView: {
     flexGrow: 1,
-    paddingBottom: 100,
+    paddingBottom: 250,
     overflow: 'visible', // Critical: allows dropdowns to render outside ScrollView bounds
   },
 });
 export default Dummystep2;
+

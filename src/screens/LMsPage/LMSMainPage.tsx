@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@models/Model';
@@ -33,6 +33,30 @@ const LMSMainPage = () => {
     // },
     // {
     //   id: 4,
+    //   name: "React Native",
+    //   progress: 10,
+    //   image: require('../assets/reactnative.jfif'),
+    // },
+    // {
+    //   id: 5,
+    //   name: "JavaScript",
+    //   progress: 75,
+    //   image: require('../assets/javascript.jfif'),
+    // },
+    // {
+    //   id: 6,
+    //   name: "React Native",
+    //   progress: 10,
+    //   image: require('../assets/reactnative.jfif'),
+    // },
+    {
+      id: 7,
+      name: "Interview Preparedness",
+      progress: 75,
+      image: require('../../assests/Images/backgrounds/html&css.png'),
+    },
+    // {
+    //   id: 8,
     //   name: "React Native",
     //   progress: 10,
     //   image: require('../assets/reactnative.jfif'),
@@ -124,44 +148,46 @@ const LMSMainPage = () => {
       source={require("../../assests/Images/backgrounds/image.png")}
       style={styles.background}
     >
-      <View style={styles.container}>
-        {/* Custom Header */}
-        <View style={styles.header}>
-          <View style={styles.navHeaderRow}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.navBackButton}
-            >
-              <MaterialIcon name="arrow-back" size={24} color="#000" />
-            </TouchableOpacity>
-            <Text style={styles.heading}>LMS Main Page</Text>
-            <View style={styles.navBackButtonPlaceholder} />
+      <ScrollView>
+        <View style={styles.container}>
+          {/* Custom Header */}
+          <View style={styles.header}>
+            <View style={styles.navHeaderRow}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.navBackButton}
+              >
+                <MaterialIcon name="arrow-back" size={24} color="#000" />
+              </TouchableOpacity>
+              <Text style={styles.heading}>LMS Main Page</Text>
+              <View style={styles.navBackButtonPlaceholder} />
+            </View>
           </View>
-        </View>
 
-        {loading ? (
-          <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color="#F5A623" />
-            <Text style={styles.loadingText}>Loading progress data...</Text>
-          </View>
-        ) : error ? (
-          <View style={styles.centerContainer}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : (
-          <View style={styles.coursesContainer}>
-            {courses.map((course) => (
-              <CourseCard
-                key={course.id}
-                courseName={course.name}
-                progress={course.progress}
-                imageSource={course.image}
-                onPress={() => handleCoursePress(course.name, course.id, course.progress)}
-              />
-            ))}
-          </View>
-        )}
-      </View>
+          {loading ? (
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color="#F5A623" />
+              <Text style={styles.loadingText}>Loading progress data...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.centerContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : (
+            <View style={styles.coursesContainer}>
+              {courses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  courseName={course.name}
+                  progress={course.progress}
+                  imageSource={course.image}
+                  onPress={() => handleCoursePress(course.name, course.id, course.progress)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
     </ImageBackground>
   );
 };

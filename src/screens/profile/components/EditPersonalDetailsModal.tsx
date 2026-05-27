@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,10 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {ProfileApiService} from '@services/profile/ProfileApiService';
-import {showToast} from '@services/login/ToastService';
+import { ProfileApiService } from '@services/profile/ProfileApiService';
+import { showToast } from '@services/login/ToastService';
 import Toast from 'react-native-toast-message';
-import {toastConfig} from '@components/Toast/toast_config';
+import { toastConfig } from '@components/Toast/toast_config';
 
 interface EditPersonalDetailsModalProps {
   visible: boolean;
@@ -99,10 +99,10 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
           ? initialData.knownLanguages
           : [],
       });
-      
+
       // Parse existing date of birth (YYYY-MM-DD format)
       // Don't populate day/month/year here - they will be populated when date picker opens
-      
+
       setErrors({});
       setGenderOpen(false);
       setShowDatePicker(false);
@@ -183,15 +183,15 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
     if (field === 'fullName' || field === 'address') {
       value = value.replace(/\s+/g, ' ');
     }
-    setFormData({...formData, [field]: value});
-    
+    setFormData({ ...formData, [field]: value });
+
     // Validate field in real-time
     const error = validateField(field, value);
     if (error) {
-      setErrors({...errors, [field]: error});
+      setErrors({ ...errors, [field]: error });
     } else {
       // Clear error if field is now valid
-      const newErrors = {...errors};
+      const newErrors = { ...errors };
       delete newErrors[field];
       setErrors(newErrors);
     }
@@ -199,7 +199,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     // Full Name - Required, min 3 characters
     const trimmedFullName = formData.fullName.trim();
     if (!trimmedFullName) {
@@ -213,14 +213,14 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
     } else if (!/^[a-zA-Z\s]+$/.test(trimmedFullName)) {
       newErrors.fullName = 'Full name can only contain letters and spaces';
     }
-    
+
     // Gender - Required
     if (!formData.gender) {
       newErrors.gender = 'Gender is required. Please select Male, Female, or Other';
     } else if (!['Male', 'Female', 'Other'].includes(formData.gender)) {
       newErrors.gender = 'Please select a valid gender (Male, Female, or Other)';
     }
-    
+
     // Email - Required, validate format
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
@@ -230,14 +230,14 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         newErrors.email = 'Only @gmail.com email addresses are allowed';
       }
     }
-    
+
     // Phone - Required
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^[6-9]\d{9}$/.test(formData.phone)) {
       newErrors.phone = 'Invalid phone number. Must start with 6-9 and be 10 digits';
     }
-    
+
     // Date of Birth - Required (YYYY-MM-DD format)
     if (!formData.dateOfBirth) {
       newErrors.dateOfBirth = 'Date of birth is required';
@@ -252,14 +252,14 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         const m = parseInt(parts[1]);
         const d = parseInt(parts[2]);
         const date = new Date(y, m - 1, d);
-        
+
         if (isNaN(date.getTime()) || date.getDate() !== d || date.getMonth() !== m - 1 || date.getFullYear() !== y) {
           newErrors.dateOfBirth = 'Invalid date. Please enter a valid date';
         } else {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           date.setHours(0, 0, 0, 0);
-          
+
           // Validate year must be greater than 1990
           if (y <= 1990) {
             newErrors.dateOfBirth = 'Year of birth must be greater than 1990';
@@ -270,12 +270,12 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
             let age = today.getFullYear() - y;
             const monthDiff = today.getMonth() - date.getMonth();
             const dayDiff = today.getDate() - date.getDate();
-            
+
             // Adjust age if birthday hasn't occurred this year
             if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
               age--;
             }
-            
+
             if (age < 16) {
               newErrors.dateOfBirth = 'You must be at least 16 years old';
             } else if (age > 100) {
@@ -285,7 +285,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         }
       }
     }
-    
+
     // Pincode - Required
     if (!formData.pincode.trim()) {
       newErrors.pincode = 'PIN code is required';
@@ -294,7 +294,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
     } else if (formData.pincode === '000000') {
       newErrors.pincode = 'PIN code cannot be 000000';
     }
-    
+
     // Address - Required, min 3 characters
     const trimmedAddress = formData.address.trim();
     if (!trimmedAddress) {
@@ -306,7 +306,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
     } else if (/\s{2,}/.test(formData.address)) {
       newErrors.address = 'Only one space allowed between words';
     }
-    
+
     // Known Languages - Required, at least one language, each min 3 characters
     if (formData.knownLanguages.length === 0) {
       newErrors.knownLanguages = 'At least one language is required';
@@ -316,7 +316,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         newErrors.knownLanguages = 'Each language must be at least 3 characters';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -325,101 +325,101 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
     if (!day || !month || !year) {
       const errorMsg = 'Please fill all date fields (Day, Month, Year)';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
 
     const d = parseInt(day);
     const m = parseInt(month);
     const y = parseInt(year);
-    
+
     // Validate day
     if (isNaN(d) || d < 1 || d > 31) {
       const errorMsg = 'Day must be between 1 and 31';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
-    
+
     // Validate month
     if (isNaN(m) || m < 1 || m > 12) {
       const errorMsg = 'Month must be between 1 and 12';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
-    
+
     // Validate year - must be greater than 1990
     if (isNaN(y) || y <= 1990) {
       const errorMsg = 'Year of birth must be greater than 1990';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
-    
+
     // Validate year is not in the future
     const currentYear = new Date().getFullYear();
     if (y > currentYear) {
       const errorMsg = 'Year cannot be in the future';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
-    
+
     const date = new Date(y, m - 1, d);
-    
+
     // Check if date is valid
     if (isNaN(date.getTime()) || date.getDate() !== d || date.getMonth() !== m - 1 || date.getFullYear() !== y) {
       const errorMsg = 'Please enter a valid date (e.g., 31 days not valid for February)';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: 'Please enter a valid date'});
+      setErrors({ ...errors, dateOfBirth: 'Please enter a valid date' });
       return;
     }
-    
+
     // Check date is not in the future
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     date.setHours(0, 0, 0, 0);
-    
+
     if (date > today) {
       const errorMsg = 'Date of birth cannot be in the future';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
-    
+
     // Calculate accurate age considering month and day
     let age = today.getFullYear() - y;
     const monthDiff = today.getMonth() - date.getMonth();
     const dayDiff = today.getDate() - date.getDate();
-    
+
     // Adjust age if birthday hasn't occurred this year
     if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
       age--;
     }
-    
+
     // Validate age must be at least 16 years
     if (age < 16) {
       const errorMsg = 'You must be at least 16 years old';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     } else if (age > 100) {
       const errorMsg = 'Please enter a valid date of birth (age must be less than 100)';
       showToast('error', errorMsg);
-      setErrors({...errors, dateOfBirth: errorMsg});
+      setErrors({ ...errors, dateOfBirth: errorMsg });
       return;
     }
-    
+
     // Format as YYYY-MM-DD for API
     const formattedDate = `${y}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    setFormData({...formData, dateOfBirth: formattedDate});
-    
+    setFormData({ ...formData, dateOfBirth: formattedDate });
+
     // Clear errors on success
     if (errors.dateOfBirth) {
-      setErrors({...errors, dateOfBirth: ''});
+      setErrors({ ...errors, dateOfBirth: '' });
     }
-    
+
     // Close date picker modal
     setShowDatePicker(false);
     setFocusedField(null);
@@ -427,7 +427,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
 
   const handleSave = async () => {
     console.log('[EditPersonalDetailsModal] Save button pressed');
-    
+
     if (!validate()) {
       const errorMessages = Object.values(errors).filter(Boolean);
       if (errorMessages.length > 0) {
@@ -457,15 +457,15 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         address: formData.address.trim(),
         knownLanguages: formData.knownLanguages || [],
       };
-      
+
       console.log('[EditPersonalDetailsModal] Sending payload:', JSON.stringify(payload, null, 2));
-      
+
       const result = await ProfileApiService.updatePersonalDetails(userId, userToken, payload);
       console.log('[EditPersonalDetailsModal] Update result:', {
         success: result.success,
         error: result.error,
       });
-      
+
       if (result.success) {
         console.log('[EditPersonalDetailsModal] Update successful');
         // Stop loading first
@@ -483,7 +483,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         // Handle API error responses
         setLoading(false);
         let errorMessage = 'Failed to update personal details. Please try again.';
-        
+
         if (result.error) {
           if (typeof result.error === 'string') {
             errorMessage = result.error;
@@ -496,15 +496,15 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
             const validationErrors = result.error.errors;
             if (typeof validationErrors === 'object' && validationErrors !== null) {
               const errorMessages = Object.values(validationErrors).flat() as any[];
-              errorMessage = Array.isArray(errorMessages) && errorMessages.length > 0 
-                ? String(errorMessages[0]) 
+              errorMessage = Array.isArray(errorMessages) && errorMessages.length > 0
+                ? String(errorMessages[0])
                 : String(errorMessages);
             }
           }
         } else if ((result as any).message) {
           errorMessage = (result as any).message;
         }
-        
+
         console.error('[EditPersonalDetailsModal] Update failed:', errorMessage);
         showToast('error', errorMessage);
       }
@@ -515,17 +515,17 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
         response: error?.response?.data,
         status: error?.response?.status,
       });
-      
+
       setLoading(false);
-      
+
       // Handle network errors and API errors with detailed messages
       let errorMessage = 'An unexpected error occurred. Please try again.';
-      
+
       if (error?.response) {
         // API returned an error response
         const status = error.response.status;
         const data = error.response.data;
-        
+
         if (status === 400) {
           // Bad Request - validation errors - show detailed response
           if (data?.message) {
@@ -575,7 +575,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
       } else if (error?.message) {
         errorMessage = error.message;
       }
-      
+
       console.error('[EditPersonalDetailsModal] Update error message:', errorMessage);
       showToast('error', errorMessage);
     }
@@ -584,120 +584,120 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
   return (
     <>
       <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Edit Personal Details</Text>
-            <TouchableOpacity onPress={onClose}>
-              <MaterialIcons name="close" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.overlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Edit Personal Details</Text>
+              <TouchableOpacity onPress={onClose}>
+                <MaterialIcons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
 
-          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-            <View style={styles.form}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Full Name <Text style={styles.required}>*</Text></Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.fullName && styles.inputError,
-                    focusedField === 'fullName' && styles.inputFocused,
-                  ]}
-                  value={formData.fullName}
-                  onChangeText={value => handleChange('fullName', value)}
-                  onFocus={() => setFocusedField('fullName')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Enter full name"
-                  placeholderTextColor="#9ca3af"
-                />
-                {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Gender <Text style={styles.required}>*</Text></Text>
-                <DropDownPicker
-                  open={genderOpen}
-                  value={formData.gender}
-                  items={[
-                    {label: 'Male', value: 'Male'},
-                    {label: 'Female', value: 'Female'},
-                    {label: 'Other', value: 'Other'},
-                  ]}
-                  setOpen={setGenderOpen}
-                  setValue={value => {
-                    const genderValue = typeof value === 'function' ? value(formData.gender) : value;
-                    handleChange('gender', genderValue || '');
-                    setErrors({...errors, gender: ''});
-                  }}
-                  placeholder="Select Gender"
-                  style={[styles.dropdown, errors.gender && styles.inputError]}
-                  dropDownContainerStyle={styles.dropdownContainer}
-                  placeholderStyle={styles.placeholderText}
-                  textStyle={styles.dropdownText}
-                  listMode="SCROLLVIEW"
-                  zIndex={3000}
-                  zIndexInverse={1000}
-                />
-                {errors.gender && <Text style={styles.errorText}>{errors.gender}</Text>}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
-                <View style={[styles.input, styles.inputDisabled]}>
-                  <Text 
-                    style={styles.inputDisabledText}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {formData.email || 'example@gmail.com'}
-                  </Text>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+              <View style={styles.form}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Full Name <Text style={styles.required}>*</Text></Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      errors.fullName && styles.inputError,
+                      focusedField === 'fullName' && styles.inputFocused,
+                    ]}
+                    value={formData.fullName}
+                    onChangeText={value => handleChange('fullName', value)}
+                    onFocus={() => setFocusedField('fullName')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Enter full name"
+                    placeholderTextColor="#9ca3af"
+                  />
+                  {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
                 </View>
-                {formData.email && (
-                  <Text style={styles.hintText}>Email cannot be changed</Text>
-                )}
-              </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Phone Number <Text style={styles.required}>*</Text></Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.phone && styles.inputError,
-                    focusedField === 'phone' && styles.inputFocused,
-                  ]}
-                  value={formData.phone}
-                  onChangeText={value => {
-                    const numeric = value.replace(/[^0-9]/g, '');
-                    if (numeric.length <= 10) {
-                      handleChange('phone', numeric);
-                    }
-                  }}
-                  onFocus={() => setFocusedField('phone')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Enter 10-digit phone number"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                />
-                {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-              </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Gender <Text style={styles.required}>*</Text></Text>
+                  <DropDownPicker
+                    open={genderOpen}
+                    value={formData.gender}
+                    items={[
+                      { label: 'Male', value: 'Male' },
+                      { label: 'Female', value: 'Female' },
+                      { label: 'Other', value: 'Other' },
+                    ]}
+                    setOpen={setGenderOpen}
+                    setValue={value => {
+                      const genderValue = typeof value === 'function' ? value(formData.gender) : value;
+                      handleChange('gender', genderValue || '');
+                      setErrors({ ...errors, gender: '' });
+                    }}
+                    placeholder="Select Gender"
+                    style={[styles.dropdown, errors.gender && styles.inputError]}
+                    dropDownContainerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.placeholderText}
+                    textStyle={styles.dropdownText}
+                    listMode="SCROLLVIEW"
+                    zIndex={3000}
+                    zIndexInverse={1000}
+                  />
+                  {errors.gender && <Text style={styles.errorText}>{errors.gender}</Text>}
+                </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Date of Birth <Text style={styles.required}>*</Text></Text>
-                <TouchableOpacity
-                  style={[
-                    styles.input,
-                    styles.dateInputContainer,
-                    errors.dateOfBirth && styles.inputError,
-                    focusedField === 'dateOfBirth' && styles.inputFocused,
-                  ]}
-                  onPress={() => {
-                    setFocusedField('dateOfBirth');
-                    setShowDatePicker(true);
-                  }}>
-                  <Text style={[styles.dateText, !formData.dateOfBirth && styles.placeholderText, styles.dateTextFlex]}>
-                    {formData.dateOfBirth 
-                      ? (() => {
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
+                  <View style={[styles.input, styles.inputDisabled]}>
+                    <Text
+                      style={styles.inputDisabledText}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {formData.email || 'example@gmail.com'}
+                    </Text>
+                  </View>
+                  {formData.email && (
+                    <Text style={styles.hintText}>Email cannot be changed</Text>
+                  )}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Phone Number <Text style={styles.required}>*</Text></Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      errors.phone && styles.inputError,
+                      focusedField === 'phone' && styles.inputFocused,
+                    ]}
+                    value={formData.phone}
+                    onChangeText={value => {
+                      const numeric = value.replace(/[^0-9]/g, '');
+                      if (numeric.length <= 10) {
+                        handleChange('phone', numeric);
+                      }
+                    }}
+                    onFocus={() => setFocusedField('phone')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Enter 10-digit phone number"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="phone-pad"
+                    maxLength={10}
+                  />
+                  {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Date of Birth <Text style={styles.required}>*</Text></Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.input,
+                      styles.dateInputContainer,
+                      errors.dateOfBirth && styles.inputError,
+                      focusedField === 'dateOfBirth' && styles.inputFocused,
+                    ]}
+                    onPress={() => {
+                      setFocusedField('dateOfBirth');
+                      setShowDatePicker(true);
+                    }}>
+                    <Text style={[styles.dateText, !formData.dateOfBirth && styles.placeholderText, styles.dateTextFlex]}>
+                      {formData.dateOfBirth
+                        ? (() => {
                           // Display in DD/MM/YYYY format for user (e.g., 06/05/2000)
                           const parts = formData.dateOfBirth.split('-');
                           if (parts.length === 3) {
@@ -708,177 +708,177 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
                           }
                           return formData.dateOfBirth;
                         })()
-                      : 'Select Date of Birth'}
-                  </Text>
-                  <MaterialIcons name="calendar-today" size={20} color="#666" />
-                </TouchableOpacity>
-                {errors.dateOfBirth && <Text style={styles.errorText}>{errors.dateOfBirth}</Text>}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>PIN Code <Text style={styles.required}>*</Text></Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.pincode && styles.inputError,
-                    focusedField === 'pincode' && styles.inputFocused,
-                  ]}
-                  value={formData.pincode}
-                  onChangeText={value => {
-                    const numeric = value.replace(/[^0-9]/g, '');
-                    if (numeric.length <= 6) {
-                      handleChange('pincode', numeric);
-                    }
-                  }}
-                  onFocus={() => setFocusedField('pincode')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Enter 6-digit PIN code"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="numeric"
-                  maxLength={6}
-                />
-                {errors.pincode && <Text style={styles.errorText}>{errors.pincode}</Text>}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Permanent Address <Text style={styles.required}>*</Text></Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    styles.textArea,
-                    errors.address && styles.inputError,
-                    focusedField === 'address' && styles.inputFocused,
-                  ]}
-                  value={formData.address}
-                  onChangeText={value => handleChange('address', value)}
-                  onFocus={() => setFocusedField('address')}
-                  onBlur={() => setFocusedField(null)}
-                  placeholder="Enter permanent address"
-                  placeholderTextColor="#9ca3af"
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-                {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Known Languages <Text style={styles.required}>*</Text></Text>
-                {errors.knownLanguages && <Text style={styles.errorText}>{errors.knownLanguages}</Text>}
-                
-                {/* Display existing languages as chips */}
-                {formData.knownLanguages.length > 0 && (
-                  <View style={styles.languagesContainer}>
-                    {formData.knownLanguages.map((lang, index) => (
-                      <View key={index} style={styles.languageChip}>
-                        <Text style={styles.languageChipText}>{lang}</Text>
-                        <TouchableOpacity
-                          onPress={() => {
-                            const updated = formData.knownLanguages.filter((_, i) => i !== index);
-                            setFormData({...formData, knownLanguages: updated});
-                          }}
-                          style={styles.removeLanguageButton}>
-                          <MaterialIcons name="close" size={16} color="#666" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Add new language input */}
-                {showLanguageInput ? (
-                  <View style={styles.addLanguageContainer}>
-                    <TextInput
-                      style={styles.languageInput}
-                      value={newLanguage}
-                      onChangeText={setNewLanguage}
-                      placeholder="Enter language name"
-                      placeholderTextColor="#9ca3af"
-                      autoFocus
-                      onSubmitEditing={() => {
-                        if (newLanguage.trim()) {
-                          const trimmed = newLanguage.trim();
-                          if (trimmed.length < 3) {
-                            showToast('error', 'Each language must be at least 3 characters');
-                            return;
-                          }
-                          if (!formData.knownLanguages.includes(trimmed)) {
-                            setFormData({
-                              ...formData,
-                              knownLanguages: [...formData.knownLanguages, trimmed],
-                            });
-                            if (errors.knownLanguages) {
-                              setErrors({...errors, knownLanguages: ''});
-                            }
-                          }
-                          setNewLanguage('');
-                          setShowLanguageInput(false);
-                        }
-                      }}
-                    />
-                    <TouchableOpacity
-                      style={styles.addLanguageButton}
-                      onPress={() => {
-                        if (newLanguage.trim()) {
-                          const trimmed = newLanguage.trim();
-                          if (trimmed.length < 3) {
-                            showToast('error', 'Each language must be at least 3 characters');
-                            return;
-                          }
-                          if (!formData.knownLanguages.includes(trimmed)) {
-                            setFormData({
-                              ...formData,
-                              knownLanguages: [...formData.knownLanguages, trimmed],
-                            });
-                            if (errors.knownLanguages) {
-                              setErrors({...errors, knownLanguages: ''});
-                            }
-                          }
-                          setNewLanguage('');
-                          setShowLanguageInput(false);
-                        }
-                      }}>
-                      <MaterialIcons name="check" size={20} color="#F97316" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.cancelLanguageButton}
-                      onPress={() => {
-                        setNewLanguage('');
-                        setShowLanguageInput(false);
-                      }}>
-                      <MaterialIcons name="close" size={20} color="#666" />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.addLanguageButtonContainer}
-                    onPress={() => setShowLanguageInput(true)}>
-                    <MaterialIcons name="add" size={20} color="#F97316" />
-                    <Text style={styles.addLanguageText}>Add Language</Text>
+                        : 'Select Date of Birth'}
+                    </Text>
+                    <MaterialIcons name="calendar-today" size={20} color="#666" />
                   </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          </ScrollView>
+                  {errors.dateOfBirth && <Text style={styles.errorText}>{errors.dateOfBirth}</Text>}
+                </View>
 
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-              onPress={handleSave}
-              disabled={loading}>
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.saveButtonText}>Save</Text>
-              )}
-            </TouchableOpacity>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>PIN Code <Text style={styles.required}>*</Text></Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      errors.pincode && styles.inputError,
+                      focusedField === 'pincode' && styles.inputFocused,
+                    ]}
+                    value={formData.pincode}
+                    onChangeText={value => {
+                      const numeric = value.replace(/[^0-9]/g, '');
+                      if (numeric.length <= 6) {
+                        handleChange('pincode', numeric);
+                      }
+                    }}
+                    onFocus={() => setFocusedField('pincode')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Enter 6-digit PIN code"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
+                    maxLength={6}
+                  />
+                  {errors.pincode && <Text style={styles.errorText}>{errors.pincode}</Text>}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Permanent Address <Text style={styles.required}>*</Text></Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      styles.textArea,
+                      errors.address && styles.inputError,
+                      focusedField === 'address' && styles.inputFocused,
+                    ]}
+                    value={formData.address}
+                    onChangeText={value => handleChange('address', value)}
+                    onFocus={() => setFocusedField('address')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Enter permanent address"
+                    placeholderTextColor="#9ca3af"
+                    multiline
+                    numberOfLines={4}
+                    textAlignVertical="top"
+                  />
+                  {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Known Languages <Text style={styles.required}>*</Text></Text>
+                  {errors.knownLanguages && <Text style={styles.errorText}>{errors.knownLanguages}</Text>}
+
+                  {/* Display existing languages as chips */}
+                  {formData.knownLanguages.length > 0 && (
+                    <View style={styles.languagesContainer}>
+                      {formData.knownLanguages.map((lang, index) => (
+                        <View key={index} style={styles.languageChip}>
+                          <Text style={styles.languageChipText}>{lang}</Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              const updated = formData.knownLanguages.filter((_, i) => i !== index);
+                              setFormData({ ...formData, knownLanguages: updated });
+                            }}
+                            style={styles.removeLanguageButton}>
+                            <MaterialIcons name="close" size={16} color="#666" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  {/* Add new language input */}
+                  {showLanguageInput ? (
+                    <View style={styles.addLanguageContainer}>
+                      <TextInput
+                        style={styles.languageInput}
+                        value={newLanguage}
+                        onChangeText={setNewLanguage}
+                        placeholder="Enter language name"
+                        placeholderTextColor="#9ca3af"
+                        autoFocus
+                        onSubmitEditing={() => {
+                          if (newLanguage.trim()) {
+                            const trimmed = newLanguage.trim();
+                            if (trimmed.length < 3) {
+                              showToast('error', 'Each language must be at least 3 characters');
+                              return;
+                            }
+                            if (!formData.knownLanguages.includes(trimmed)) {
+                              setFormData({
+                                ...formData,
+                                knownLanguages: [...formData.knownLanguages, trimmed],
+                              });
+                              if (errors.knownLanguages) {
+                                setErrors({ ...errors, knownLanguages: '' });
+                              }
+                            }
+                            setNewLanguage('');
+                            setShowLanguageInput(false);
+                          }
+                        }}
+                      />
+                      <TouchableOpacity
+                        style={styles.addLanguageButton}
+                        onPress={() => {
+                          if (newLanguage.trim()) {
+                            const trimmed = newLanguage.trim();
+                            if (trimmed.length < 3) {
+                              showToast('error', 'Each language must be at least 3 characters');
+                              return;
+                            }
+                            if (!formData.knownLanguages.includes(trimmed)) {
+                              setFormData({
+                                ...formData,
+                                knownLanguages: [...formData.knownLanguages, trimmed],
+                              });
+                              if (errors.knownLanguages) {
+                                setErrors({ ...errors, knownLanguages: '' });
+                              }
+                            }
+                            setNewLanguage('');
+                            setShowLanguageInput(false);
+                          }
+                        }}>
+                        <MaterialIcons name="check" size={20} color="#F97316" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.cancelLanguageButton}
+                        onPress={() => {
+                          setNewLanguage('');
+                          setShowLanguageInput(false);
+                        }}>
+                        <MaterialIcons name="close" size={20} color="#666" />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.addLanguageButtonContainer}
+                      onPress={() => setShowLanguageInput(true)}>
+                      <MaterialIcons name="add" size={20} color="#F97316" />
+                      <Text style={styles.addLanguageText}>Add Language</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+                onPress={handleSave}
+                disabled={loading}>
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.saveButtonText}>Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
+          <Toast config={toastConfig} />
         </View>
-        <Toast config={toastConfig} />
-      </View>
       </Modal>
 
       {/* Date Picker Modal */}
@@ -1013,7 +1013,7 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
                   setMonth('');
                   setYear('');
                   if (errors.dateOfBirth) {
-                    setErrors({...errors, dateOfBirth: ''});
+                    setErrors({ ...errors, dateOfBirth: '' });
                   }
                 }}>
                 <MaterialIcons name="clear" size={16} color="#F97316" />
@@ -1045,13 +1045,13 @@ const EditPersonalDetailsModal: React.FC<EditPersonalDetailsModalProps> = ({
                   setShowDatePicker(false);
                   setFocusedField(null);
                   if (errors.dateOfBirth) {
-                    setErrors({...errors, dateOfBirth: ''});
+                    setErrors({ ...errors, dateOfBirth: '' });
                   }
                 }}>
                 <Text style={styles.dateCancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.dateConfirmButton} 
+              <TouchableOpacity
+                style={styles.dateConfirmButton}
                 onPress={handleDateSelect}>
                 <Text style={styles.dateConfirmButtonText}>Confirm</Text>
               </TouchableOpacity>

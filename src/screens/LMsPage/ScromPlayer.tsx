@@ -36,6 +36,21 @@ const COURSE_DATA: Record<string, any[]> = {
   // "java": [
   //   { topic: "Java Basics", videos: [{ title: "Java Course", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/How+to+Set+Goals_web+2/story.html" }] },
   // ],
+  'interview preparedness': [
+    // ── Group 0: Understanding Yourself (3 subtopics) ──────────────────────
+    { topic: "Understanding Yourself – Self Realization", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Understanding Yourself – Self Realization", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Understanding+Yourself++Self+Realization/story.html" }] },
+    { topic: "Confidence Building & Self-Motivation", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Confidence Building & Self-Motivation", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Confidence+building+and+self-motivation/story.html" }] },
+    { topic: "Overcoming Shyness, Fear & Anxiety", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Overcoming Shyness, Fear & Anxiety", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Shyness%2C+Fear%2C+and+Anxiety+-+Ways+of+Control/story.html" }] },
+    // ── Group 1: Introduction to Communication (4 subtopics) ───────────────
+    { topic: "Components of Communication", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Components of Communication", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Components+of+Communication/story.html" }] },
+    { topic: "Communication Methods", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Communication Methods", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Communication+Methods/story.html" }] },
+    { topic: "Conveying Message Effectively – Part 1", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Conveying Message Effectively – Part 1", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Conveying+Message+Effectively+-+Part+1/story.html" }] },
+    { topic: "Conveying Message Effectively – Part 2", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Conveying Message Effectively – Part 2", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Conveying+Message+Effectively+-+Part+2/story.html" }] },
+    // ── Group 2: Self Introduction (3 subtopics) ──────────────────────────
+    { topic: "Creating Self-Introduction", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Creating Self-Introduction", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Creating+Self-introduction/story.html" }] },
+    { topic: "Tips for Effective Introduction", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Tips for Effective Introduction", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Tips+for+Effective+Introduction+in+Different+Scenarios/story.html" }] },
+    { topic: "Creating Your First Impression", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Creating Your First Impression", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Creating+Self-introduction/story.html" }] },
+  ]
 };
 
 const getCourseId = (name: string): number => {
@@ -46,6 +61,7 @@ const getCourseId = (name: string): number => {
     'sql': 4,
     'react': 5,
     'spring boot': 6,
+    'interview preparedness': 7,
   };
   return courseMap[name.toLowerCase()] || 0;
 };
@@ -754,7 +770,7 @@ const ScormPlayer = () => {
         // 1. cmi.core.lesson_location → current slide identifier
         if (key === 'cmi.core.lesson_location') {
           console.log(`📍 lesson_location → active subtopic set to: "${value}"`);
-          
+
           let slideNum = 1;
           const matchNum = value.match(/\d+/);
           if (matchNum) {
@@ -780,7 +796,7 @@ const ScormPlayer = () => {
 
             // Dynamically adjust total count if the highest slide number or visited size exceeds totalCount
             const dynamicTotal = Math.max(total, visitedCountVal, slideNum);
-            
+
             // Trigger progress state update
             updateProgressState(visitedCountVal, dynamicTotal);
             setVisitedCount(visitedCountVal);
