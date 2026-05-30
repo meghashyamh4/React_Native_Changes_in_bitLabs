@@ -38,19 +38,33 @@ const COURSE_DATA: Record<string, any[]> = {
   // ],
   'interview preparedness': [
     // ── Group 0: Understanding Yourself (3 subtopics) ──────────────────────
-    { topic: "Understanding Yourself – Self Realization", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Understanding Yourself – Self Realization", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Understanding+Yourself++Self+Realization/story.html" }] },
-    { topic: "Confidence Building & Self-Motivation", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Confidence Building & Self-Motivation", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Confidence+building+and+self-motivation/story.html" }] },
-    { topic: "Overcoming Shyness, Fear & Anxiety", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Overcoming Shyness, Fear & Anxiety", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Shyness%2C+Fear%2C+and+Anxiety+-+Ways+of+Control/story.html" }] },
+    { topic: "Understanding Yourself – Self Realization", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Understanding Yourself – Self Realization", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Understanding+Yourself++Self+Realization/index_lms.html" }] },
+    { topic: "Confidence Building & Self-Motivation", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Confidence Building & Self-Motivation", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Confidence+building+and+self-motivation/index_lms.html" }] },
+    { topic: "Overcoming Shyness, Fear & Anxiety", groupName: "Understanding Yourself", groupIndex: 0, videos: [{ title: "Overcoming Shyness, Fear & Anxiety", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Shyness%2C+Fear%2C+and+Anxiety+-+Ways+of+Control/index_lms.html" }] },
     // ── Group 1: Introduction to Communication (4 subtopics) ───────────────
-    { topic: "Components of Communication", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Components of Communication", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Components+of+Communication/story.html" }] },
-    { topic: "Communication Methods", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Communication Methods", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Communication+Methods/story.html" }] },
-    { topic: "Conveying Message Effectively – Part 1", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Conveying Message Effectively – Part 1", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Conveying+Message+Effectively+-+Part+1/story.html" }] },
-    { topic: "Conveying Message Effectively – Part 2", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Conveying Message Effectively – Part 2", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Conveying+Message+Effectively+-+Part+2/story.html" }] },
+    { topic: "Components of Communication", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Components of Communication", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Components+of+Communication/index_lms.html" }] },
+    { topic: "Communication Methods", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Communication Methods", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Communication+Methods/index_lms.html" }] },
+    { topic: "Conveying Message Effectively – Part 1", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Conveying Message Effectively – Part 1", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Conveying+Message+Effectively+-+Part+1/index_lms.html" }] },
+    { topic: "Conveying Message Effectively – Part 2", groupName: "Introduction to Communication", groupIndex: 1, videos: [{ title: "Conveying Message Effectively – Part 2", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Conveying+Message+Effectively+-+Part+2/index_lms.html" }] },
     // ── Group 2: Self Introduction (3 subtopics) ──────────────────────────
-    { topic: "Creating Self-Introduction", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Creating Self-Introduction", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Creating+Self-introduction/story.html" }] },
-    { topic: "Tips for Effective Introduction", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Tips for Effective Introduction", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Tips+for+Effective+Introduction+in+Different+Scenarios/story.html" }] },
-    { topic: "Creating Your First Impression", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Creating Your First Impression", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Creating+Self-introduction/story.html" }] },
-  ]
+    { topic: "Creating Self-Introduction", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Creating Self-Introduction", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Creating+Self-introduction/index_lms.html" }] },
+    { topic: "Tips for Effective Introduction", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Tips for Effective Introduction", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Tips+for+Effective+Introduction+in+Different+Scenarios/index_lms.html" }] },
+    { topic: "Creating Your First Impression", groupName: "Self Introduction", groupIndex: 2, videos: [{ title: "Creating Your First Impression", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Softskills+Foundation+-+Creating+Self-introduction/index_lms.html" }] },
+  ],
+  'sql': [
+    { topic: "Introduction to Structured Query Language(SQL)", videos: [{ title: "Introduction to Structured Query Language(SQL)", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Introduction%20to%20Structured%20Query%20Language(SQL)/index_lms.html" }] },
+    { topic: "Data Definition Language (DDL)", videos: [{ title: "Data Definition Language (DDL)", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Data%20Definition%20Language%20(DDL)/index_lms.html" }] },
+    { topic: "Data Manipulation Language (DML)", videos: [{ title: "Data Manipulation Language (DML)", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Data%20Manipulation%20Language%20(DML)/index_lms.html" }] },
+    { topic: "Constraints", videos: [{ title: "Constraints", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Constraints_/index_lms.html" }] },
+    { topic: "Normalization", videos: [{ title: "Normalization", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/Normalization/index_lms.html" }] },
+    { topic: "SQL Clauses", videos: [{ title: "SQL Clauses", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/SQL%20Clauses/index_lms.html" }] },
+    { topic: "SQL Functions", videos: [{ title: "SQL Functions", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/SQL%20Functions/index_lms.html" }] },
+    { topic: "SQL Joins and Views", videos: [{ title: "SQL Joins and Views", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/SQL%20Joins%20and%20Views/index_lms.html" }] },
+    { topic: "SQL Operators", videos: [{ title: "SQL Operators", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/SQL%20Operators/index_lms.html" }] },
+    { topic: "SQL Sub-queries", videos: [{ title: "SQL Sub-queries", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/SQL%20Sub-queries/index_lms.html" }] },
+    { topic: "TCL and DCL Commands", videos: [{ title: "TCL and DCL Commands", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/TCL%20and%20DCL%20Commands_/index_lms.html" }] },
+  ],
+
 };
 
 const getCourseId = (name: string): number => {
@@ -107,6 +121,16 @@ const ScormPlayer = () => {
   const courseContent = COURSE_DATA[courseName?.toLowerCase()] || [];
   const currentUrl = courseContent[selectedTopicIndex]?.videos[0]?.url || initialUrl;
 
+  // Debug logging for course content loading
+  console.log('📚 [SCORM PLAYER] Course loading:', {
+    courseName,
+    courseNameLower: courseName?.toLowerCase(),
+    courseContentLength: courseContent.length,
+    availableCourses: Object.keys(COURSE_DATA),
+    selectedTopicIndex,
+    currentUrl
+  });
+
   const toggleSidebar = () => {
     const toValue = sidebarVisible ? 300 : 0;
     Animated.timing(slideAnim, {
@@ -121,6 +145,8 @@ const ScormPlayer = () => {
   // Extracts both the visited slides and the total slide count.
   const parseSuspendData = useCallback((data: string): { visited: number; total: number } | null => {
     try {
+      console.log('🔍 [SCORM] Parsing suspend_data:', data);
+
       // In Articulate Storyline, suspend_data contains a bitstring (0s and 1s) representing slide progress.
       // It is often preceded by 'u' (e.g. '2u101000...')
       // We match all alphanumeric characters after 'u' and strictly verify they contain only '0' and '1'.
@@ -128,10 +154,12 @@ const ScormPlayer = () => {
       if (matchU) {
         const segment = matchU[1];
         if (/^[01]+$/.test(segment)) {
-          return {
+          const result = {
             visited: segment.split('').filter(c => c === '1').length,
             total: segment.length
           };
+          console.log('✅ [SCORM] Parsed from u-prefixed bitstring:', result);
+          return result;
         }
       }
 
@@ -139,12 +167,66 @@ const ScormPlayer = () => {
       const matchRaw = data.match(/^([01]{2,})$/);
       if (matchRaw) {
         const bitstring = matchRaw[0];
-        return {
+        const result = {
           visited: bitstring.split('').filter(c => c === '1').length,
           total: bitstring.length
         };
+        console.log('✅ [SCORM] Parsed from raw bitstring:', result);
+        return result;
       }
-    } catch (e) { }
+
+      // NEW: Handle Interview Preparedness format (different Articulate encoding)
+      // Format: 2o3m60708090a0b0c0d0e0f0g0~201$1001a12T0101201112012120131201412015120161201712018120191201a12~...
+      // The segment after ~ contains slide visitation data in hex format
+      const matchInterview = data.match(/~(\d+)\$(\w+)(\d+)([01]+)/);
+      if (matchInterview) {
+        // Try to extract bitstring from the format
+        const hexSegment = matchInterview[2];
+        const bitstringSegment = matchInterview[4];
+
+        // If we have a bitstring segment, use it
+        if (bitstringSegment && bitstringSegment.length >= 2) {
+          const result = {
+            visited: bitstringSegment.split('').filter(c => c === '1').length,
+            total: bitstringSegment.length
+          };
+          console.log('✅ [SCORM] Parsed from Interview Preparedness bitstring segment:', result);
+          return result;
+        }
+
+        // Otherwise, try to parse hex segment as slide indicators
+        // The hex segment contains slide visitation data
+        if (hexSegment) {
+          // Count the number of unique slide indicators in the hex data
+          // Each pair of hex digits represents a slide
+          const slideCount = Math.ceil(hexSegment.length / 2);
+          // Estimate visited based on non-zero values
+          const visited = hexSegment.split('').filter(c => c !== '0').length / 2;
+          const result = {
+            visited: Math.round(visited),
+            total: slideCount
+          };
+          console.log('✅ [SCORM] Parsed from Interview Preparedness hex segment:', result);
+          return result;
+        }
+      }
+
+      // Alternative: Look for any sequence of 0s and 1s in the data (not just at the start)
+      const matchAnyBits = data.match(/([01]{5,})/);
+      if (matchAnyBits) {
+        const bitstring = matchAnyBits[1];
+        const result = {
+          visited: bitstring.split('').filter(c => c === '1').length,
+          total: bitstring.length
+        };
+        console.log('✅ [SCORM] Parsed from embedded bitstring:', result);
+        return result;
+      }
+
+      console.log('⚠️ [SCORM] Could not parse suspend_data, returning null');
+    } catch (e) {
+      console.error('❌ [SCORM] Error parsing suspend_data:', e);
+    }
     return null;
   }, []);
 
@@ -152,6 +234,15 @@ const ScormPlayer = () => {
   const saveTopicToDb = useCallback(async (topicIdx: number, progress: number) => {
     if (!userId || progress <= 0) return;
     try {
+      console.log('💾 [DB] Attempting to save progress:', {
+        topicIdx,
+        progress,
+        courseName,
+        courseId: getCourseId(courseName),
+        courseContentLength: courseContent.length,
+        topicProgressRef: topicProgressRef.current
+      });
+
       // Use the latest topicProgress from ref to compute overall
       const allProgress = { ...topicProgressRef.current, [topicIdx]: progress };
       const totalProg = Object.values(allProgress).reduce((a, b) => a + b, 0);
@@ -164,7 +255,7 @@ const ScormPlayer = () => {
         overall = 1;
       }
 
-      await ProgressService.saveProgress({
+      const payload = {
         applicantId: userId,
         courseId: getCourseId(courseName),
         courseName: courseName || `Course ${courseId}`,
@@ -173,7 +264,11 @@ const ScormPlayer = () => {
         topicIndex: topicIdx,
         topicName: courseContent[topicIdx]?.topic || '',
         topicProgress: progress,
-      });
+      };
+
+      console.log('💾 [DB] Saving progress payload:', payload);
+
+      await ProgressService.saveProgress(payload);
       console.log(`💾 [DB] ✅ Topic ${topicIdx} → ${progress}% | Overall: ${overall}%`);
     } catch (error) {
       console.error('❌ [DB] Save failed:', error);
@@ -336,11 +431,22 @@ const ScormPlayer = () => {
     const loadTopicProgress = async () => {
       if (!userId) return;
       try {
+        console.log('📡 [Backend Progress] Loading progress for:', {
+          userId,
+          courseName,
+          courseNameLower: courseName?.toLowerCase(),
+          courseId: getCourseId(courseName)
+        });
+
         const applicantCourses = await ProgressService.getApplicantProgress(userId.toString());
         const courses = applicantCourses?.data?.data || applicantCourses?.data || applicantCourses || [];
+        console.log('📡 [Backend Progress] All courses from API:', courses);
+
         const currentCourse = (Array.isArray(courses) ? courses : []).find(
           (c: any) => (c.courseName || c.course_name)?.toLowerCase() === courseName?.toLowerCase()
         );
+
+        console.log('📡 [Backend Progress] Found current course:', currentCourse);
 
         if (currentCourse) {
           setCourseProgressId(currentCourse.id);
@@ -384,9 +490,11 @@ const ScormPlayer = () => {
           console.log("🎯 Auto-navigating to topic index:", nextTopicIndex);
           setSelectedTopicIndex(nextTopicIndex);
           setCurrentProgress(progressMap[nextTopicIndex] || 0);
+        } else {
+          console.warn('⚠️ [Backend Progress] No course found for:', courseName);
         }
       } catch (err) {
-        console.error('Error loading topic progress:', err);
+        console.error('❌ Error loading topic progress:', err);
       } finally {
         setProgressLoaded(true);
         serverLoadedRef.current = true; // Allow DB writes from here on
@@ -762,6 +870,7 @@ const ScormPlayer = () => {
   const handleMessage = (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
+      console.log('📨 [SCORM] Received message:', data.type, data);
 
       if (data.type === 'setValue') {
         const { key, value } = data;
@@ -797,6 +906,8 @@ const ScormPlayer = () => {
             // Dynamically adjust total count if the highest slide number or visited size exceeds totalCount
             const dynamicTotal = Math.max(total, visitedCountVal, slideNum);
 
+            console.log(`📊 [SCORM] Using visited slides for progress: ${visitedCountVal}/${dynamicTotal}`);
+
             // Trigger progress state update
             updateProgressState(visitedCountVal, dynamicTotal);
             setVisitedCount(visitedCountVal);
@@ -818,6 +929,8 @@ const ScormPlayer = () => {
             }
             // Use the exact visited count reported by suspend_data
             updateProgressState(res.visited, res.total);
+          } else {
+            console.warn('⚠️ [SCORM] suspend_data could not be parsed, value:', value);
           }
         }
 
@@ -851,6 +964,7 @@ const ScormPlayer = () => {
       }
 
       if (data.type === 'commit' && data.data) {
+        console.log('💾 [SCORM] Commit received:', data.data);
         // Also scan commit snapshot for the 4 keys as a fallback
         const snap = data.data as Record<string, string>;
         if (snap['cmi.core.lesson_status'] === 'completed' || snap['cmi.core.lesson_status'] === 'passed') {

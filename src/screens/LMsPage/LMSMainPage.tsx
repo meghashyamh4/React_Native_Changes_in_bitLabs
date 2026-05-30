@@ -31,12 +31,12 @@ const LMSMainPage = () => {
     //   progress: 75,
     //   image: require('../assets/javascript.jfif'),
     // },
-    // {
-    //   id: 4,
-    //   name: "React Native",
-    //   progress: 10,
-    //   image: require('../assets/reactnative.jfif'),
-    // },
+    {
+      id: 4,
+      name: "SQL",
+      progress: 10,
+      image: require('../../assests/Images/backgrounds/sql.jpeg'),
+    },
     // {
     //   id: 5,
     //   name: "JavaScript",
@@ -53,7 +53,7 @@ const LMSMainPage = () => {
       id: 7,
       name: "Interview Preparedness",
       progress: 75,
-      image: require('../../assests/Images/backgrounds/html&css.png'),
+      image: require('../../assests/Images/backgrounds/interview_preparedness.jpeg'),
     },
     // {
     //   id: 8,
@@ -83,6 +83,12 @@ const LMSMainPage = () => {
         const dataArray = progressResponse?.data?.data || progressResponse?.data || progressResponse;
         console.log('[LMS] Resolved progress dataArray:', dataArray);
         if (dataArray && Array.isArray(dataArray)) {
+          console.log('[LMS] Database courses:', dataArray.map((c: any) => ({
+            id: c.courseId || c.course_id,
+            name: c.courseName || c.course_name,
+            progress: c.overallProgress || c.overall_progress
+          })));
+
           // Update courses with progress data from database
           setCourses(prevCourses => {
             const updated = prevCourses.map(course => {
@@ -136,10 +142,16 @@ const LMSMainPage = () => {
   }, [userId, navigation]);
 
   const handleCoursePress = (courseName: string, courseId: number, courseProgress: number) => {
+    console.log('📚 [LMS] Navigating to ScormPlayer:', {
+      courseName,
+      courseId,
+      courseProgress,
+      courseNameLower: courseName.toLowerCase()
+    });
     navigation.navigate('ScormPlayer', {
       progress: courseProgress,
       courseId: courseId,
-      courseName: courseName
+      courseName: courseName.toLowerCase() // Ensure lowercase for consistent matching
     });
   };
 
