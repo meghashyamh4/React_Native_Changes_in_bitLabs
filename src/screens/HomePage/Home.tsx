@@ -442,7 +442,7 @@ import {
   ImageBackground,
 } from 'react-native';
 
-import { AskNewtonCard } from './AskNewton';
+import { LMSCard } from './LMSCard';
 import ProfileCardsRow from './ProfileCardsRow';
 import LinearGradient from 'react-native-linear-gradient';
 import { useProfilePhoto } from '@context/ProfilePhotoContext';
@@ -643,9 +643,9 @@ function Dashboard() {
                 />
               )} */}
 
-              <AskNewtonCard
-                botImage={require("../../assests/Images/Asknewton/robo.png")}
-                handleRedirect3={() => navigation.navigate("InterviewPreparation")}
+              <LMSCard
+                botImage={require("../../assests/Images/backgrounds/LMSLogo.png")}
+                handleRedirect3={() => navigation.navigate("LMSMainPage")}
                 loading={false}
               />
 

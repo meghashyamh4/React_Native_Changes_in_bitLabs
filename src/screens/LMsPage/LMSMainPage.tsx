@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, ActivityIndicator, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@models/Model';
@@ -25,45 +25,40 @@ const LMSMainPage = () => {
       progress: 45,
       image: require('../../assests/Images/backgrounds/python.png'),
     },
-    // {
-    //   id: 3,
-    //   name: "JavaScript",
-    //   progress: 75,
-    //   image: require('../assets/javascript.jfif'),
-    // },
     {
       id: 4,
       name: "SQL",
       progress: 10,
       image: require('../../assests/Images/backgrounds/sql.jpeg'),
     },
-    // {
-    //   id: 5,
-    //   name: "JavaScript",
-    //   progress: 75,
-    //   image: require('../assets/javascript.jfif'),
-    // },
-    // {
-    //   id: 6,
-    //   name: "React Native",
-    //   progress: 10,
-    //   image: require('../assets/reactnative.jfif'),
-    // },
+    {
+      id: 5,
+      name: "JavaScript & ES6",
+      progress: 0,
+      image: require('../../assests/Images/backgrounds/JavaScript.jpeg'),
+    },
+    {
+      id: 6,
+      name: "React.js",
+      progress: 0,
+      image: require('../../assests/Images/backgrounds/React-JS.png'),
+    },
     {
       id: 7,
       name: "Interview Preparedness",
       progress: 75,
       image: require('../../assests/Images/backgrounds/interview_preparedness.jpeg'),
     },
-    // {
-    //   id: 8,
-    //   name: "React Native",
-    //   progress: 10,
-    //   image: require('../assets/reactnative.jfif'),
-    // },
+    {
+      id: 8,
+      name: "Java Exceptions & Algorithms",
+      progress: 0,
+      image: require('../../assests/Images/backgrounds/javaExceptionsAndAlgorithems.jpeg'),
+    },
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch and sync course progress data (on mount, userId load, and screen focus)
   useEffect(() => {
@@ -155,6 +150,11 @@ const LMSMainPage = () => {
     });
   };
 
+  // Filter courses based on search query
+  const filteredCourses = courses.filter(course =>
+    course.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <ImageBackground
       source={require("../../assests/Images/backgrounds/image.png")}
@@ -176,6 +176,25 @@ const LMSMainPage = () => {
             </View>
           </View>
 
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <MaterialIcon name="search" size={20} color="#999" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search courses..."
+                placeholderTextColor="#999"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                  <MaterialIcon name="close" size={20} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
           {loading ? (
             <View style={styles.centerContainer}>
               <ActivityIndicator size="large" color="#F5A623" />
@@ -187,15 +206,21 @@ const LMSMainPage = () => {
             </View>
           ) : (
             <View style={styles.coursesContainer}>
-              {courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  courseName={course.name}
-                  progress={course.progress}
-                  imageSource={course.image}
-                  onPress={() => handleCoursePress(course.name, course.id, course.progress)}
-                />
-              ))}
+              {filteredCourses.length > 0 ? (
+                filteredCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    courseName={course.name}
+                    progress={course.progress}
+                    imageSource={course.image}
+                    onPress={() => handleCoursePress(course.name, course.id, course.progress)}
+                  />
+                ))
+              ) : (
+                <View style={styles.centerContainer}>
+                  <Text style={styles.noResultsText}>No courses found</Text>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -263,6 +288,37 @@ const styles = StyleSheet.create({
   coursesContainer: {
     width: '100%',
     alignItems: 'center',
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    fontFamily: 'PlusJakartaSans-Medium',
+  },
+  clearButton: {
+    padding: 4,
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
 });
 

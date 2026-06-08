@@ -64,6 +64,7 @@ const ProfileCardsRow: React.FC = () => {
   const [blogsError, setBlogsError] = useState<string | null>(null);
   const [streakData, setStreakData] = useState<StreakDetails | null>(null);
   const [streakLoading, setStreakLoading] = useState(true);
+  const [userRank, setUserRank] = useState<number>(0);
 
   // Cache refs to prevent unnecessary refetching
   const videosCacheRef = useRef<{ data: any[]; timestamp: number } | null>(null);
@@ -172,6 +173,22 @@ const ProfileCardsRow: React.FC = () => {
       }
     };
     fetchUserName();
+  }, [userId, userToken]);
+
+  // Fetch user rank from leaderboard
+  useEffect(() => {
+    const fetchUserRank = async () => {
+      if (!userId || !userToken) return;
+      try {
+        const result = await ProfileApiService.fetchUserRank(userId, userToken);
+        if (result.success && result.rank) {
+          setUserRank(result.rank);
+        }
+      } catch (error) {
+        console.error('Error fetching user rank:', error);
+      }
+    };
+    fetchUserRank();
   }, [userId, userToken]);
 
   // Refresh score from UserContext when component mounts or userId changes
@@ -416,6 +433,7 @@ const ProfileCardsRow: React.FC = () => {
         backgroundColor={cardColors[0].bg}
         borderColor={cardColors[0].border}
         scoreDetails={scoreDetails}
+        userRank={userRank}
       />
 
       {/* Streak Card - Below Portfolio */}

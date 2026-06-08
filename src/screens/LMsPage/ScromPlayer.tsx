@@ -64,7 +64,48 @@ const COURSE_DATA: Record<string, any[]> = {
     { topic: "SQL Sub-queries", videos: [{ title: "SQL Sub-queries", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/SQL%20Sub-queries/index_lms.html" }] },
     { topic: "TCL and DCL Commands", videos: [{ title: "TCL and DCL Commands", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/TCL%20and%20DCL%20Commands_/index_lms.html" }] },
   ],
-
+  'react.js': [
+    { topic: "Introduction to ReactJS", videos: [{ title: "Introduction to ReactJS", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/Introduction+to+ReactJs/index_lms.html" }] },
+    { topic: "ReactJS – Environment Setup", videos: [{ title: "ReactJS – Environment Setup", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+-+Environment+Setup/index_lms.html" }] },
+    { topic: "ReactJS Components", videos: [{ title: "ReactJS Components", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Components/index_lms.html" }] },
+    { topic: "ReactJS Component Life Cycle", videos: [{ title: "ReactJS Component Life Cycle", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Component+Life+Cycle/index_lms.html" }] },
+    { topic: "ReactJS Hooks", videos: [{ title: "ReactJS Hooks", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Hooks/index_lms.html" }] },
+    { topic: "ReactJS Forms and UI", videos: [{ title: "ReactJS Forms and UI", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Forms+and+UI/index_lms.html" }] },
+    { topic: "ReactJS Router", videos: [{ title: "ReactJS Router", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Router/index_lms.html" }] },
+    { topic: "ReactJS Conditional Rendering", videos: [{ title: "ReactJS Conditional Rendering", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Conditional+Rendering/index_lms.html" }] },
+    { topic: "ReactJS Event Handling", videos: [{ title: "ReactJS Event Handling", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Event+Handling/index_lms.html" }] },
+    { topic: "ReactJS Styles", videos: [{ title: "ReactJS Styles", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Styles/index_lms.html" }] },
+    { topic: "ReactJS Unit Testing & API Integration", videos: [{ title: "ReactJS Unit Testing & API Integration", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/React/ReactJS+Unit+Testing++API%C2%A0Integration/index_lms.html" }] },
+  ],
+  "javascript & es6": [
+    { topic: "Introduction to Scalable Vector Graphics (SVG)", videos: [{ title: "Introduction to Scalable Vector Graphics (SVG)", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Introduction+to+Scalable+Vector+Graphics+(SVG)/index_lms.html" }] },
+    { topic: "SVG - Shape Properties", videos: [{ title: "SVG - Shape Properties", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/SVG+-+Shape+Properties/index_lms.html" }] },
+    { topic: "Introduction to Responsive Web Designs", videos: [{ title: "Introduction to Responsive Web Designs", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Introduction+to+Responsive+Web+Designs/index_lms.html" }] },
+    { topic: "Introduction to Media Queries", videos: [{ title: "Introduction to Media Queries", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Introduction+to+Media+Queries/index_lms.html" }] },
+    { topic: "Implementation of Web Applications Using Media Queries", videos: [{ title: "Implementation of Web Applications Using Media Queries", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Implementation+of+Web+Applications+Using+Media+Queries/index_lms.html" }] },
+    { topic: "Introduction to JavaScript", videos: [{ title: "Introduction to JavaScript", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Introduction+to+JavaScript/index_lms.html" }] },
+    { topic: "JavaScript - Working with Data Types and Operators", videos: [{ title: "JavaScript - Working with Data Types and Operators", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/JavaScript+-+Working+with+Data+Types+and+Operators/index_lms.html" }] },
+    { topic: "JavaScript - Control Statements", videos: [{ title: "JavaScript - Control Statements", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/JavaScript+%E2%80%93+Control+Statements/index_lms.html" }] },
+    { topic: "JavaScript Validation & Regular Expressions", videos: [{ title: "JavaScript Validation & Regular Expressions", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/JavaScript+Validation++Regular+Expressions/index_lms.html" }] },
+    { topic: "JavaScript Events", videos: [{ title: "JavaScript Events", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/JavaScript+Events/index_lms.html" }] },
+    { topic: "Introduction to ECMAScript (ES6)", videos: [{ title: "Introduction to ECMAScript (ES6)", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Introduction+to+ECMAScript+(ES6)/index_lms.html" }] },
+    { topic: "ECMAScript (ES6) - Functions", videos: [{ title: "ECMAScript (ES6) - Functions", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/ECMAScript(ES6)+-+Functions+(1)/index_lms.html" }] },
+    { topic: "Introduction to JavaScript Object Notation (JSON)", videos: [{ title: "Introduction to JavaScript Object Notation (JSON)", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/Introduction+to+_JavaScript+Object+Notation(JSON)/index_lms.html" }] },
+    { topic: "JSON - Objects", videos: [{ title: "JSON - Objects", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/javascript/JSON+-+Objects/index_lms.html" }] },
+  ],
+  "java exceptions & algorithms": [
+    { topic: "Exception Handling Overview", videos: [{ title: "Exception Handling Overview", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/EXCEPTION+HANDLING+OVERVIEW/index_lms.html" }] },
+    { topic: "Exception Handling Methods", videos: [{ title: "Exception Handling Methods", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/Exception+Handling+Methods/index_lms.html" }] },
+    { topic: "Custom Exceptions", videos: [{ title: "Custom Exceptions", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/CUSTOM+EXCEPTIONS/index_lms.html" }] },
+    { topic: "File Handling using Byte Streams", videos: [{ title: "File Handling using Byte Streams", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/FILE+HANDLING+USING+BYTE+STREAMS/index_lms.html" }] },
+    { topic: "File Handling using Character Streams", videos: [{ title: "File Handling using Character Streams", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/FILE+HANDLING+USING+CHARACTER+STREAMS/index_lms.html" }] },
+    { topic: "Multi Threading", videos: [{ title: "Multi Threading", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/MULTITHREADING/index_lms.html" }] },
+    { topic: "Memory Management and Garbage Collection", videos: [{ title: "Memory Management and Garbage Collection", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/MEMORY%20MANAGEMENT%20AND%20GARBAGE%20COLLECTION/index_lms.html" }] },
+    { topic: "Sorting Algorithms", videos: [{ title: "Sorting Algorithms", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/SORTING%20ALGORITHMS/index_lms.html" }] },
+    { topic: "Searching Algorithms", videos: [{ title: "Searching Algorithms", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/SEARCHING%20ALGORITHMS/index_lms.html" }] },
+    { topic: "Working with Large Datasets", videos: [{ title: "Working with Large Datasets", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/WORKING+WITH+LARGE+DATASETS/index_lms.html" }] },
+    { topic: "UML Diagrams", videos: [{ title: "UML Diagrams", url: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/Staging/ScromPackages/java_exception_algorithms/UML+DIAGRAMS/index_lms.html" }] }
+  ],
 };
 
 const getCourseId = (name: string): number => {
@@ -73,9 +114,11 @@ const getCourseId = (name: string): number => {
     'python': 2,
     'java': 3,
     'sql': 4,
-    'react': 5,
-    'spring boot': 6,
+    'react.js': 6,
     'interview preparedness': 7,
+    'javascript & es6': 5,
+    'java exceptions & algorithms': 8,
+    'java exceptions & algorithems': 8,
   };
   return courseMap[name.toLowerCase()] || 0;
 };

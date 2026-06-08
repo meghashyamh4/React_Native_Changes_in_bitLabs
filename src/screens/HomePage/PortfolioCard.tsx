@@ -12,6 +12,7 @@ type PortfolioCardProps = {
   backgroundColor?: string;
   borderColor?: string;
   scoreDetails?: any;
+  userRank?: number;
 };
 
 export const PortfolioCard: React.FC<PortfolioCardProps> = ({
@@ -23,6 +24,7 @@ export const PortfolioCard: React.FC<PortfolioCardProps> = ({
   backgroundColor = '#FFF5E6',
   borderColor = '#EA7B20',
   scoreDetails,
+  userRank = 0,
 }) => {
   const alternatePhone = profileData?.basicDetails?.alternatePhoneNumber || '';
   const email = profileData?.applicant?.email || '';
@@ -136,9 +138,15 @@ export const PortfolioCard: React.FC<PortfolioCardProps> = ({
               <Text style={styles.scoreValue}>{dashboardScore ?? 0}</Text>
             </View>
           </View>
-          <View style={styles.detailRow}>
-            <Icon name="email" size={18} color="#EA7B20" />
-            <Text style={styles.detailText} numberOfLines={1} ellipsizeMode="tail">{email || 'N/A'}</Text>
+          <View style={styles.contactRow}>
+            <View style={styles.detailRow}>
+              <Icon name="email" size={18} color="#EA7B20" />
+              <Text style={styles.detailText} numberOfLines={1} ellipsizeMode="tail">{email || 'N/A'}</Text>
+            </View>
+            <View style={styles.portfolioScoreDetails}>
+              <Text style={styles.scoreLabel}>rank</Text>
+              <Text style={styles.scoreValue}>{userRank > 0 ? `#${userRank}` : 'N/A'}</Text>
+            </View>
           </View>
         </View>
       </View>

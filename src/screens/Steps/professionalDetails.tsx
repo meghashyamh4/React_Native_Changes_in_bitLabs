@@ -471,10 +471,9 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
               placeholderStyle={styles.placeholderText}
               selectedTextStyle={styles.dropdownText}
               itemTextStyle={styles.dropdownText}
+              itemContainerStyle={styles.itemContainerStyle}
+              activeColor="#6B7280"
               containerStyle={styles.dropdownContainer}
-              search
-              searchPlaceholder="Search qualification..."
-              searchPlaceholderTextColor="#9ca3af"
             />
             {Boolean(errors.qualification) && <Text style={styles.errorText}>{errors.qualification}</Text>}
           </View>
@@ -498,10 +497,9 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
               placeholderStyle={styles.placeholderText}
               selectedTextStyle={styles.dropdownText}
               itemTextStyle={styles.dropdownText}
+              itemContainerStyle={styles.itemContainerStyle}
+              activeColor="#6B7280"
               containerStyle={styles.dropdownContainer}
-              search
-              searchPlaceholder="Search specialization..."
-              searchPlaceholderTextColor="#9ca3af"
               disable={!qualification}
             />
             {Boolean(errors.specialization) && <Text style={styles.errorText}>{errors.specialization}</Text>}
@@ -526,10 +524,9 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
               placeholderStyle={styles.placeholderText}
               selectedTextStyle={styles.dropdownText}
               itemTextStyle={styles.dropdownText}
+              itemContainerStyle={styles.itemContainerStyle}
+              activeColor="#6B7280"
               containerStyle={styles.dropdownContainer}
-              search
-              searchPlaceholder="Search skills..."
-              searchPlaceholderTextColor="#9ca3af"
               renderSelectedItem={(item, unSelect) => (
                 <TouchableOpacity style={styles.selectedItem} onPress={() => unSelect && unSelect(item)}>
                   <Text style={styles.selectedItemText}>{item.label}</Text>
@@ -562,10 +559,9 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
               placeholderStyle={styles.placeholderText}
               selectedTextStyle={styles.dropdownText}
               itemTextStyle={styles.dropdownText}
+              itemContainerStyle={styles.itemContainerStyle}
+              activeColor="#6B7280"
               containerStyle={[styles.dropdownContainer, { maxHeight: 150 }]}
-              search
-              searchPlaceholder="Search location..."
-              searchPlaceholderTextColor="#9ca3af"
               renderSelectedItem={(item, unSelect) => (
                 <TouchableOpacity style={styles.selectedItem} onPress={() => unSelect && unSelect(item)}>
                   <Text style={styles.selectedItemText}>{item.label}</Text>
@@ -598,10 +594,9 @@ const Dummystep2: React.FC = ({ route, navigation }: any) => {
               placeholderStyle={styles.placeholderText}
               selectedTextStyle={styles.dropdownText}
               itemTextStyle={styles.dropdownText}
+              itemContainerStyle={styles.itemContainerStyle}
+              activeColor="#6B7280"
               containerStyle={styles.dropdownContainer}
-              search
-              searchPlaceholder="Search experience..."
-              searchPlaceholderTextColor="#9ca3af"
             />
             {Boolean(errors.experience) && (
               <Text style={styles.errorText}>{errors.experience}</Text>
@@ -781,6 +776,9 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14,
     color: 'black',
+  },
+  itemContainerStyle: {
+    padding: 4,
   },
   selectedItem: {
     flexDirection: 'row',

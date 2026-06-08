@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, TextInput, Image, StyleSheet, ScrollView} from 'react-native';
+import {View, Text, TextInput, Image, StyleSheet, ScrollView, KeyboardAvoidingView, Platform} from 'react-native';
 import ProgressBar from '@components/progessBar/ProgressBar';
 import GradientButton from '@components/styles/GradientButton';
 import {getMobileNumber} from '@services/mobile';
@@ -113,8 +113,12 @@ const handleNext = () => {
   
 
   return (
-    <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.scrollView}>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
         <Image
           style={styles.logo}
           source={{ uri: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/bitlabs-skill-images/logo.png" }} // Replace with your actual logo path
@@ -239,14 +243,14 @@ const handleNext = () => {
           />
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'flex-start',
     padding: 20,
@@ -265,7 +269,7 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     height: '98%',
     marginBottom: 40,
@@ -276,7 +280,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingVertical: 15,
-    borderTopColor: '#ccc',
+    borderTopColor: '#CCCCCC',
+    backgroundColor: '#FFFFFF',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -290,12 +295,12 @@ const styles = StyleSheet.create({
   completeProfile: {
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-Bold',
-    color: 'black',
+    color: '#000000',
     marginBottom: 8,
   },
   subHeader: {
     fontSize: 11,
-    color: 'black',
+    color: '#000000',
     fontFamily: 'PlusJakartaSans-Bold',
   },
   input: {
@@ -305,11 +310,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 5,
     backgroundColor: '#F5F5F5',
-    color: 'black',
+    color: '#000000',
     fontFamily: 'PlusJakartaSans-Medium',
   },
   errorText: {
-    color: 'red',
+    color: '#FF0000',
     fontSize: 12,
     marginTop: -8,
     marginBottom: 8,

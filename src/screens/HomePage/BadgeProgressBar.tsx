@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type BadgeProgressBarProps = {
   dashboardScore: number;
@@ -15,6 +16,7 @@ const BadgeProgressBar: React.FC<BadgeProgressBarProps> = ({
   borderColor = '#EA7B20',
   scoreDetails,
 }) => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const getPoints = (badge: string) => {
     return scoreDetails?.badgeScores?.find((b: any) => b.badge === badge)?.points;
   };
@@ -103,7 +105,13 @@ const BadgeProgressBar: React.FC<BadgeProgressBarProps> = ({
       <View style={styles.wrapper}>
         <View style={styles.progressTextContainer}>
           <Text style={styles.progressLabel}>Badge Achievement Level</Text>
-          <Text style={styles.progressPercentage}>{Math.round(overallProgress)}%</Text>
+          <View style={styles.progressRightContainer}>
+            {/* <Text style={styles.progressPercentage}>{Math.round(overallProgress)}%</Text> */}
+            <TouchableOpacity onPress={() => setIsModalOpen(true)} style={styles.learnMoreButton}>
+              <Text style={styles.learnMoreText}>Learn More</Text>
+            </TouchableOpacity>
+             <Text style={styles.progressPercentage}>{Math.round(overallProgress)}%</Text>
+          </View>
         </View>
 
         <View style={styles.barContainer} onLayout={onParentLayout}>
@@ -189,6 +197,110 @@ const BadgeProgressBar: React.FC<BadgeProgressBarProps> = ({
           <Text style={styles.congratsText}>Congrats Buddy! You unlocked all badges!</Text>
         )}
       </View>
+
+      {/* Points Modal */}
+      <Modal
+        visible={isModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsModalOpen(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setIsModalOpen(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalContent}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>How do points work?</Text>
+              <TouchableOpacity onPress={() => setIsModalOpen(false)} style={styles.closeButton}>
+                <Icon name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalDescription}>You can earn points by taking one of the actions below.</Text>
+
+              <View style={styles.pointsList}>
+                <View style={styles.pointsCard}>
+                  <View style={styles.pointsCardLeft}>
+                    <View style={styles.iconWrap}>
+                      <Text style={styles.iconEmoji}>🏆</Text>
+                    </View>
+                    <View style={styles.pointsDetails}>
+                      <Text style={styles.pointsTitle}>Conquer The Challenge</Text>
+                      <Text style={styles.pointsSub}>Hackathon Submission</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.pointsValue}>+25 Points</Text>
+                </View>
+
+                <View style={styles.pointsCard}>
+                  <View style={styles.pointsCardLeft}>
+                    <View style={styles.iconWrap}>
+                      <Text style={styles.iconEmoji}>🧠</Text>
+                    </View>
+                    <View style={styles.pointsDetails}>
+                      <Text style={styles.pointsTitle}>Prove Your Expertise</Text>
+                      <Text style={styles.pointsSub}>Skill Validation Test</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.pointsValue}>+20 Points</Text>
+                </View>
+
+                <View style={styles.pointsCard}>
+                  <View style={styles.pointsCardLeft}>
+                    <View style={styles.iconWrap}>
+                      <Text style={styles.iconEmoji}>🚀</Text>
+                    </View>
+                    <View style={styles.pointsDetails}>
+                      <Text style={styles.pointsTitle}>Ignite Your Journey</Text>
+                      <Text style={styles.pointsSub}>Hackathon Registration</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.pointsValue}>+5 Points</Text>
+                </View>
+
+                <View style={styles.pointsCard}>
+                  <View style={styles.pointsCardLeft}>
+                    <View style={styles.iconWrap}>
+                      <Text style={styles.iconEmoji}>🤝</Text>
+                    </View>
+                    <View style={styles.pointsDetails}>
+                      <Text style={styles.pointsTitle}>Link With Leaders</Text>
+                      <Text style={styles.pointsSub}>Mentor Connect Registration</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.pointsValue}>+5 Points</Text>
+                </View>
+
+                <View style={styles.pointsCard}>
+                  <View style={styles.pointsCardLeft}>
+                    <View style={styles.iconWrap}>
+                      <Text style={styles.iconEmoji}>📺</Text>
+                    </View>
+                    <View style={styles.pointsDetails}>
+                      <Text style={styles.pointsTitle}>Catch The Vibe</Text>
+                      <Text style={styles.pointsSub}>Watching Tech Buzz Shorts</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.pointsValue}>+2 Points</Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity onPress={() => setIsModalOpen(false)} style={styles.gotItButton}>
+                <Text style={styles.gotItButtonText}>Got It!</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -220,10 +332,25 @@ const styles = StyleSheet.create({
     fontFamily: 'PlusJakartaSans-Bold',
     color: '#000',
   },
+  progressRightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   progressPercentage: {
     fontSize: hp('1.8%'),
     fontFamily: 'PlusJakartaSans-Bold',
     color: '#EA7B20',
+    marginRight: wp('2%'),
+  },
+  learnMoreButton: {
+    paddingHorizontal: wp('2%'),
+    paddingVertical: hp('0.5%'),
+  },
+  learnMoreText: {
+    fontSize: hp('1.4%'),
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#EA7B20',
+    textDecorationLine: 'underline',
   },
   barContainer: {
     position: 'relative',
@@ -310,6 +437,119 @@ const styles = StyleSheet.create({
     color: '#28a745',
     textAlign: 'center',
     marginTop: hp('0.5%'),
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: wp('5%'),
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '100%',
+    maxHeight: hp('80%'),
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: wp('4%'),
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  modalTitle: {
+    fontSize: hp('2.2%'),
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: '#333',
+    flex: 1,
+  },
+  closeButton: {
+    padding: wp('1%'),
+  },
+  modalBody: {
+    padding: wp('4%'),
+    maxHeight: hp('60%'),
+  },
+  modalDescription: {
+    fontSize: hp('1.6%'),
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#666',
+    marginBottom: hp('2%'),
+  },
+  pointsList: {
+    marginTop: hp('1%'),
+  },
+  pointsCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: wp('3%'),
+    marginBottom: hp('1.5%'),
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  pointsCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconWrap: {
+    width: wp('10%'),
+    height: wp('10%'),
+    borderRadius: wp('5%'),
+    backgroundColor: '#fff5e6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: wp('3%'),
+  },
+  iconEmoji: {
+    fontSize: wp('5%'),
+  },
+  pointsDetails: {
+    flex: 1,
+  },
+  pointsTitle: {
+    fontSize: hp('1.6%'),
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: '#333',
+    marginBottom: hp('0.3%'),
+  },
+  pointsSub: {
+    fontSize: hp('1.3%'),
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#666',
+  },
+  pointsValue: {
+    fontSize: hp('1.5%'),
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: '#EA7B20',
+  },
+  modalFooter: {
+    padding: wp('4%'),
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  gotItButton: {
+    backgroundColor: '#EA7B20',
+    paddingVertical: hp('1.5%'),
+    paddingHorizontal: wp('8%'),
+    borderRadius: 28,
+    alignItems: 'center',
+  },
+  gotItButtonText: {
+    fontSize: hp('1.8%'),
+    fontFamily: 'PlusJakartaSans-Bold',
+    color: '#fff',
   },
 });
 

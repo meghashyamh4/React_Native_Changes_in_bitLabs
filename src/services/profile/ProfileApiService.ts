@@ -406,5 +406,26 @@ export const ProfileApiService = {
       return { success: false, available: false };
     }
   },
+
+  // Fetch user rank from leaderboard
+  async fetchUserRank(userId: number, userToken: string) {
+    try {
+      console.log('📡 [API] Fetching leaderboard for user rank calculation, userId:', userId);
+      const { data: fullList } = await apiClient.get(`/applicant-scores/leaderboard?limit=10000`, {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+      console.log('📥 [API] Leaderboard response:', JSON.stringify(fullList, null, 2));
+
+      // Calculate user rank
+      const myEntry = fullList.find((e: any) => String(e.applicantId) === String(userId));
+      const realRank = myEntry ? fullList.indexOf(myEntry) + 1 : 0;
+
+      console.log('✅ [API] User rank calculated:', realRank);
+      return { success: true, rank: realRank, leaderboard: fullList };
+    } catch (error: any) {
+      console.error('❌ [API] Failed to fetch user rank:', error);
+      return { success: false, rank: 0, leaderboard: [] };
+    }
+  },
 };
 

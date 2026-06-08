@@ -86,8 +86,8 @@ android {
         applicationId "com.bigtimes"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 49// or higher than Play Store's version
-        versionName "2.6.7"
+        versionCode 50// or higher than Play Store's version
+        versionName "2.6.8"
 
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
