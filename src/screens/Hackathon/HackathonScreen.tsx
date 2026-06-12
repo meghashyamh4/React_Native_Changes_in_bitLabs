@@ -489,14 +489,51 @@ const HackathonScreen = () => {
         >
           {item.status === "COMPLETED" ? "EXPIRED" : item.status}
         </Text>
-        <Image
-          source={{
-            uri:
-              item.bannerUrl ||
-              "https://via.placeholder.com/300x200?text=No+Image",
-          }}
-          style={styles.banner}
-        />
+        <View style={styles.bannerWrapper}>
+          <Image
+            source={{
+              uri:
+                item.bannerUrl ||
+                "https://via.placeholder.com/300x200?text=No+Image",
+            }}
+            style={styles.banner}
+          />
+        </View>
+
+        {/* Winner overlay — half over banner, half below */}
+        {item.status === "COMPLETED" && item.winnerInfo && (
+          <View style={styles.winnerContainer}>
+            {/* Sparkle decorations */}
+            <Text style={styles.winnerSparkleLeft}>✦ ✦</Text>
+            <Text style={styles.winnerLabel}>WINNER!</Text>
+            <Text style={styles.winnerSparkleRight}>✦ ✦</Text>
+
+            {/* Medal icon */}
+            <Text style={styles.winnerMedal}>🏆</Text>
+
+            {/* Profile photo with ribbon badge */}
+            <View style={styles.winnerAvatarWrapper}>
+              <Image
+                source={{
+                  uri:
+                    item.winnerInfo.imageUrl ||
+                    "https://via.placeholder.com/80",
+                }}
+                style={styles.winnerAvatar}
+              />
+              {/* Gold ribbon badge */}
+              {/* <View style={styles.winnerRibbonBadge}>
+                <Text style={styles.winnerRibbonEmoji}></Text>
+              </View> */}
+            </View>
+
+            {/* Winner name */}
+            <Text style={styles.winnerName}>
+              {item.winnerInfo.firstName} {item.winnerInfo.lastName}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.cardBody}>
           <Text style={styles.company}>{item.company}</Text>
           <Text style={styles.title}>{item.title}</Text>
@@ -520,34 +557,6 @@ const HackathonScreen = () => {
                 style={styles.registrationIcon}
               />
               <Text style={styles.registrationText}>{registrationText}</Text>
-            </View>
-          )}
-
-
-          {item.status === "COMPLETED" && item.winnerInfo && (
-            <View style={{ marginTop: 6, alignItems: "center" }}>
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: "#28a745",
-                  fontFamily: "PlusJakartaSans-Bold",
-                }}
-              >
-                Winner: {item.winnerInfo.firstName} {item.winnerInfo.lastName}
-              </Text>
-              <Image
-                source={{
-                  uri:
-                    item.winnerInfo.imageUrl ||
-                    "https://via.placeholder.com/50",
-                }}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  marginTop: 4,
-                }}
-              />
             </View>
           )}
         </View>
@@ -868,8 +877,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     marginBottom: 16,
-    overflow: "hidden",
+    overflow: "visible",
     elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   badge: {
     position: "absolute",
@@ -886,6 +899,11 @@ const styles = StyleSheet.create({
   active: { backgroundColor: "#28a745" },
   upcoming: { backgroundColor: "#F97316" },
   completed: { backgroundColor: "#000000" },
+  bannerWrapper: {
+    overflow: "hidden",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
   banner: { width: "100%", height: 180, objectFit: "fill" },
   cardBody: { padding: 12 },
   company: { fontSize: 14, color: "#F46F16", fontFamily: "PlusJakartaSans-Bold" },
@@ -1047,6 +1065,94 @@ const styles = StyleSheet.create({
   viewBtnText: { color: "#fff", fontSize: 13, fontFamily: "PlusJakartaSans-Bold" },
   // ✅ New styles for empty state
   emptyContainer: { marginTop: 40, alignItems: "center", paddingHorizontal: 20 },
-  emptyImage: { width: 200, height: 200, marginBottom: 20 },  // Adjust size as needed for your images
+  emptyImage: { width: 200, height: 200, marginBottom: 20 },
   emptyMessage: { fontSize: 16, color: "#888", fontFamily: "PlusJakartaSans-Bold", textAlign: "center" },
+
+  // ── Winner Section ──────────────────────────────────────────────
+  winnerContainer: {
+    marginTop: -70,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#F5C842",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 8,
+    zIndex: 10,
+  },
+  winnerLabel: {
+    fontSize: 22,
+    fontFamily: "PlusJakartaSans-Bold",
+    color: "#E8900A",
+    letterSpacing: 2,
+    textAlign: "center",
+  },
+  winnerSparkleLeft: {
+    position: "absolute",
+    left: 14,
+    top: 16,
+    fontSize: 16,
+    color: "#F5C842",
+    opacity: 0.9,
+  },
+  winnerSparkleRight: {
+    position: "absolute",
+    right: 14,
+    top: 16,
+    fontSize: 16,
+    color: "#F5C842",
+    opacity: 0.9,
+  },
+  winnerMedal: {
+    fontSize: 40,
+    marginTop: 6,
+    marginBottom: 10,
+  },
+  winnerAvatarWrapper: {
+    position: "relative",
+    marginBottom: 10,
+  },
+  winnerAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: "#F5C842",
+  },
+  winnerRibbonBadge: {
+    position: "absolute",
+    bottom: -4,
+    right: -8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#F5C842",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  winnerRibbonEmoji: {
+    fontSize: 16,
+  },
+  winnerName: {
+    fontSize: 15,
+    fontFamily: "PlusJakartaSans-Bold",
+    color: "#2F2F2F",
+    marginTop: 2,
+    textAlign: "center",
+  },
 });

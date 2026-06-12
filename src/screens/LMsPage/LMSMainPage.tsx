@@ -26,6 +26,12 @@ const LMSMainPage = () => {
       image: require('../../assests/Images/backgrounds/python.png'),
     },
     {
+      id: 3,
+      name: "Java",
+      progress: 0,
+      image: require('../../assests/Images/backgrounds/Java.png'),
+    },
+    {
       id: 4,
       name: "SQL",
       progress: 10,
@@ -54,6 +60,12 @@ const LMSMainPage = () => {
       name: "Java Exceptions & Algorithms",
       progress: 0,
       image: require('../../assests/Images/backgrounds/javaExceptionsAndAlgorithems.jpeg'),
+    },
+    {
+      id: 9,
+      name: "Spring Boot",
+      progress: 0,
+      image: require('../../assests/Images/backgrounds/Springboot.png'),
     },
   ]);
   const [loading, setLoading] = useState(true);

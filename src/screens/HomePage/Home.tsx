@@ -602,46 +602,46 @@ function Dashboard() {
             </>
           ) : (
             <>
-            <View style={{ display: 'flex', flexDirection: 'row', gap: 34,  alignItems: 'center', }}>
+              <View style={{ display: 'flex', flexDirection: 'row', gap: 34, alignItems: 'center', }}>
                 <View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={[styles.textBelowNavbar, isTablet && styles.tabletTextBelowNavBar]}>Hello, {userName
-                          ? userName.charAt(0).toUpperCase() + userName.slice(1)
-                          : 'Guest'}
-                        </Text>
-                        {verified && <Icon5 name="verified" size={25} color="#F46F16" style={{ marginLeft: 4, marginTop: screenHeight * 0.015, }} />}
-                      </View>
-                      <Text style={[styles.textBelowNavbar1, isTablet && { fontSize: wp('2%'), }]}>
-                        {setmsg ? 'Welcome' : 'Welcome back'} {/* Conditional rendering */}
-                      </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={[styles.textBelowNavbar, isTablet && styles.tabletTextBelowNavBar]}>Hello, {userName
+                      ? userName.charAt(0).toUpperCase() + userName.slice(1)
+                      : 'Guest'}
+                    </Text>
+                    {verified && <Icon5 name="verified" size={25} color="#F46F16" style={{ marginLeft: 4, marginTop: screenHeight * 0.015, }} />}
                   </View>
+                  <Text style={[styles.textBelowNavbar1, isTablet && { fontSize: wp('2%'), }]}>
+                    {setmsg ? 'Welcome' : 'Welcome back'} {/* Conditional rendering */}
+                  </Text>
+                </View>
 
-                   
-                  <TouchableOpacity 
-                    style={{ flex: 1 ,padding: 10, borderRadius: 8, marginRight: 16,alignItems:'center',justifyContent:'center',height:55}}
-                    onPress={() => navigation.navigate('LMSMainPage')}
+
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 10, borderRadius: 8, marginRight: 16, alignItems: 'center', justifyContent: 'center', height: 55 }}
+                  onPress={() => navigation.navigate('LMSMainPage')}
+                >
+                  <LinearGradient
+                    colors={["#FBBB5C", "#E66A0E"]}
+                    start={{ x: 1, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    useAngle={true}
+                    angle={225}
+                    style={styles.cardGradient}
                   >
-                    <LinearGradient
-                          colors={["#FBBB5C", "#E66A0E"]}
-                          start={{ x: 1, y: 0 }}
-                          end={{ x: 0, y: 1 }}
-                          useAngle={true}
-                          angle={225}
-                          style={styles.cardGradient}
-                        >
-                    <Text style={{ color: 'white' ,height:20}}>LMS</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                  
+                    <Text style={{ color: 'white', height: 20 }}>LMS</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
               </View>
 
               {/* Streak Quiz integration */}
-              {/* {streakData && !streakData.attemptedToday && !quizDone && (
+              {streakData && !streakData.attemptedToday && !quizDone && (
                 <StreakQuiz
                   onComplete={() => setQuizDone(true)}
                   onSkip={() => setQuizDone(true)}
                 />
-              )} */}
+              )}
 
               <LMSCard
                 botImage={require("../../assests/Images/backgrounds/LMSLogo.png")}
@@ -854,8 +854,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginRight: 16,
-    alignItems:'center',
-    justifyContent:'center'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
 });
 export default Dashboard;

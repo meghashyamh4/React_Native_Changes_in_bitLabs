@@ -437,13 +437,13 @@ const ProfileCardsRow: React.FC = () => {
       />
 
       {/* Streak Card - Below Portfolio */}
-      {/* {!streakLoading && streakData && (
+      {!streakLoading && streakData && (
         <StreakCard
           currentStreak={streakData.currentStreak}
           longestStreak={streakData.longestStreak}
           onExplore={() => navigation.navigate('Profile')}
         />
-      )} */}
+      )}
 
       {/* Arena Card - White */}
       <ArenaCard

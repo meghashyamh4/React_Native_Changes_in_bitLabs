@@ -414,7 +414,7 @@ export const ProfileApiService = {
       const { data: fullList } = await apiClient.get(`/applicant-scores/leaderboard?limit=10000`, {
         headers: { Authorization: `Bearer ${userToken}` },
       });
-      console.log('📥 [API] Leaderboard response:', JSON.stringify(fullList, null, 2));
+      //console.log('📥 [API] Leaderboard response:', JSON.stringify(fullList, null, 2));
 
       // Calculate user rank
       const myEntry = fullList.find((e: any) => String(e.applicantId) === String(userId));
