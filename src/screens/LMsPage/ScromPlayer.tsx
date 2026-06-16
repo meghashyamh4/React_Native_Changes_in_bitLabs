@@ -332,6 +332,17 @@ const ScormPlayer = () => {
         overall = 1;
       }
 
+      // Fix: If all topics are completed (100% each), force overall to 100%
+      const allTopicsCompleted = Object.values(allProgress).every(p => p === 100);
+      if (allTopicsCompleted && overall !== 100) {
+        overall = 100;
+      }
+
+      // Also force to 100 if total progress equals or exceeds 100 * number of topics
+      if (totalProg >= courseContent.length * 100 && overall !== 100) {
+        overall = 100;
+      }
+
       const payload = {
         applicantId: userId,
         courseId: getCourseId(courseName),

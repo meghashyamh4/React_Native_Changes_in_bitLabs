@@ -541,7 +541,7 @@ const AppWithProfileProvider = () => {
                 />
 
                 {/* {changed} */}
-                {!loading && profileChecked && <AskNewtonButton />}
+                {/* {!loading && profileChecked && <AskNewtonButton />} */}
               </View>
             </NavigationContainer>
             <Toast config={toastConfig} />

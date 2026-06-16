@@ -104,7 +104,7 @@ const SkillCard: React.FC<SkillCardProps> = ({
               width: '100%',
             }}>
             <Text style={styles.buttonText}>
-              {status === 'FAILED' ? 'Retake Test' : 'Take test'}
+              {status === 'FAILED' ? 'Retake Test' : 'Take Test'}
             </Text>
             <Icon name="external-link" size={16} color="white" style={{marginRight: 4}} />
           </View>

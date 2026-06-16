@@ -530,10 +530,10 @@ const Badge = ({ navigation }: any) => {
                                 disabled={isDisabled && currentStep === step.id}>
                                 <Text style={styles.stepButtonText}>
                                   {isDisabled && currentStep === step.id
-                                    ? 'Retake test'
+                                    ? 'Retake Test'
                                     : currentStep === step.id
-                                      ? 'Start test'
-                                      : 'Coming soon'}
+                                      ? 'Start Test'
+                                      : 'Coming Soon'}
                                 </Text>
                               </TouchableOpacity>
                             )

@@ -13,16 +13,17 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { QuizQuestion, fetchStreakQuestions } from '../../services/streak/StreakService';
+import { QuizQuestion, fetchStreakQuestions, completeStreak } from '../../services/streak/StreakService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 type StreakQuizProps = {
   onComplete: () => void;
   onSkip: () => void;
+  userId: number | string;
 };
 
-export const StreakQuiz: React.FC<StreakQuizProps> = ({ onComplete, onSkip }) => {
+export const StreakQuiz: React.FC<StreakQuizProps> = ({ onComplete, onSkip, userId }) => {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,6 +31,8 @@ export const StreakQuiz: React.FC<StreakQuizProps> = ({ onComplete, onSkip }) =>
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [completing, setCompleting] = useState(false);
+  const [userSelections, setUserSelections] = useState<Record<number, string>>({});
 
   useEffect(() => {
     loadQuestions();
@@ -42,6 +45,8 @@ export const StreakQuiz: React.FC<StreakQuizProps> = ({ onComplete, onSkip }) =>
       setQuestions(data || []);
     } catch (error) {
        console.error('Failed to load quiz questions:', error);
+       // Set empty array to allow quiz to show error state
+       setQuestions([]);
     } finally {
       setLoading(false);
     }
@@ -52,31 +57,88 @@ export const StreakQuiz: React.FC<StreakQuizProps> = ({ onComplete, onSkip }) =>
     onSkip();
   };
 
-  const handleComplete = () => {
-    setVisible(false);
-    onComplete();
+  const handleComplete = async () => {
+    try {
+      setCompleting(true);
+      await completeStreak(userId);
+      console.log("Streak completed successfully");
+      setVisible(false);
+      onComplete();
+    } catch (error) {
+      console.error("Failed to complete streak:", error);
+      // Still close the modal even if API fails
+      setVisible(false);
+      onComplete();
+    } finally {
+      setCompleting(false);
+    }
   };
 
   const handleOptionSelect = (optionKey: string) => {
     if (selectedOption) return;
     setSelectedOption(optionKey);
-    
+
+    // Store the selection for this question
+    setUserSelections(prev => ({ ...prev, [currentIndex]: optionKey }));
+
     if (optionKey === questions[currentIndex].correctAnswer) {
       setScore(score + 1);
     }
+    // Removed time limit - user can now manually navigate using Next button
+  };
 
-    setTimeout(() => {
-      if (currentIndex < questions.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedOption(null);
-      } else {
-        setShowResult(true);
-      }
-    }, 1500);
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      // Restore the selection for the previous question
+      const previousSelection = userSelections[currentIndex - 1];
+      setSelectedOption(previousSelection || null);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedOption === null) {
+      // Don't allow next without selecting an option
+      return;
+    }
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      // Restore the selection for the next question if it exists
+      const nextSelection = userSelections[currentIndex + 1];
+      setSelectedOption(nextSelection || null);
+    } else {
+      setShowResult(true);
+    }
   };
 
   if (loading) return null;
-  if (questions.length === 0) return null;
+  if (questions.length === 0) {
+    // Show error message if questions failed to load
+    return (
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={visible}
+        onRequestClose={handleClose}>
+        <View style={styles.modalOverlay}>
+          <LinearGradient
+            colors={['#FFF5E6', '#FFD580']}
+            style={styles.card}>
+            <View style={styles.resultContainer}>
+              <Text style={styles.fireEmoji}>⚠️</Text>
+              <Text style={styles.resultTitle}>No Quiz Available</Text>
+              <Text style={styles.resultText}>
+                Unable to load streak questions. Please try again later.
+              </Text>
+              <TouchableOpacity style={styles.completeButton} onPress={handleClose}>
+                <Text style={styles.completeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </View>
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -149,6 +211,26 @@ export const StreakQuiz: React.FC<StreakQuizProps> = ({ onComplete, onSkip }) =>
                   <Text style={styles.descriptionText}>{questions[currentIndex].description}</Text>
                 </View>
               )}
+
+              <View style={styles.navigationButtons}>
+                <TouchableOpacity
+                  style={[styles.navButton, currentIndex === 0 && styles.disabledButton]}
+                  onPress={handlePrevious}
+                  disabled={currentIndex === 0}>
+                  <Text style={[styles.navButtonText, currentIndex === 0 && styles.disabledButtonText]}>
+                    Previous
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.navButton, !selectedOption && styles.disabledButton]}
+                  onPress={handleNext}
+                  disabled={!selectedOption}>
+                  <Text style={[styles.navButtonText, !selectedOption && styles.disabledButtonText]}>
+                    {currentIndex === questions.length - 1 ? 'Finish' : 'Next'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </>
           )}
         </LinearGradient>
@@ -278,5 +360,32 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontFamily: 'PlusJakartaSans-Bold',
+  },
+  navigationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    gap: 12,
+  },
+  navButton: {
+    flex: 1,
+    backgroundColor: '#F46F16',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    alignItems: 'center',
+    elevation: 3,
+  },
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
+    elevation: 0,
+  },
+  navButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans-Bold',
+  },
+  disabledButtonText: {
+    color: '#999999',
   },
 });

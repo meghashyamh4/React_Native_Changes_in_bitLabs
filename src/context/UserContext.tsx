@@ -25,6 +25,8 @@ interface UserContextProps {
   totalScore: number;
   refreshScore: () => Promise<void>;
   scoreDetails: any;
+  userRank: number;
+  refreshRank: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -45,6 +47,8 @@ const UserContext = createContext<UserContextProps>({
   totalScore: 0,
   refreshScore: async () => { },
   scoreDetails: null,
+  userRank: 0,
+  refreshRank: async () => { },
 });
 
 interface UserProviderProps {
@@ -61,6 +65,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalScore, setTotalScore] = useState<number>(0);
   const [scoreDetails, setScoreDetails] = useState<any>(null);
+  const [userRank, setUserRank] = useState<number>(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -174,6 +179,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const refreshScore = async () => {
     if (!userId || !userToken) return;
+
     try {
       console.log('🔄 [USER CONTEXT] Refreshing score details...');
       const result = await ProfileApiService.fetchApplicantScoreDetails(userId, userToken);
@@ -184,8 +190,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       } else {
         console.warn('⚠️ [USER CONTEXT] Failed to fetch score details');
       }
+      // Also refresh rank when score is refreshed
+      await refreshRank();
     } catch (error) {
       console.error('❌ [USER CONTEXT] Error refreshing score details:', error);
+    }
+  };
+
+  const refreshRank = async () => {
+    if (!userId || !userToken) return;
+
+    try {
+      console.log('🔄 [USER CONTEXT] Refreshing user rank...');
+      const result = await ProfileApiService.fetchUserRank(userId, userToken);
+      if (result.success && result.rank) {
+        setUserRank(result.rank);
+        console.log('✅ [USER CONTEXT] User rank updated:', result.rank);
+      } else {
+        console.warn('⚠️ [USER CONTEXT] Failed to fetch user rank');
+      }
+    } catch (error) {
+      console.error('❌ [USER CONTEXT] Error refreshing user rank:', error);
     }
   };
 
@@ -198,6 +223,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setLastViewedJobIndex(null);
     setTotalScore(0);
     setScoreDetails(null);
+    setUserRank(0);
     setIsLoading(true);
   };
 
@@ -210,6 +236,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setLastViewedJobIndex(null);
     setTotalScore(0);
     setScoreDetails(null);
+    setUserRank(0);
     setIsLoading(true);
   };
   return (
@@ -232,6 +259,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         totalScore,
         refreshScore,
         scoreDetails,
+        userRank,
+        refreshRank,
       }}>
       {children}
     </UserContext.Provider>

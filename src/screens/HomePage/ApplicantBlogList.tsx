@@ -116,7 +116,7 @@ const ApplicantBlogsList = ({ route }: { route?: any }) => {
     setInitialLoading(true);
     try {
       // Fetch all blogs from API
-      const res = await apiClient.get("/blogs/active");
+      const res = await apiClient.get("/blogs/active?size=500");
       const fetchedBlogs = res.data || [];
       setAllBlogs(fetchedBlogs);
 

@@ -38,6 +38,18 @@ export const fetchStreakQuestions = async (): Promise<QuizQuestion[]> => {
     console.log("Streak Questions", response.data);
     return response.data;
   } catch (error) {
+    console.error('Error fetching streak questions:', error);
+    // Return empty array instead of throwing error to allow quiz to show error state
+    return [];
+  }
+};
+
+export const completeStreak = async (userId: number | string): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/streak/${userId}/complete`);
+    console.log("Streak Completed", response.data);
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };
