@@ -1,13 +1,13 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import * as Keychain from "react-native-keychain";
-import { handleLogin, handleLoginWithEmail, AuthResponse } from "../services/login/Authservice";
+import { handleLogin, handleLoginWithEmail, handleFirebaseGoogleLogin, AuthResponse } from "../services/login/Authservice";
 import { showToast } from "@services/login/ToastService";
 import LogoutModal from "../screens/LandingPage/LogoutModel";
 import { setLogoutHandler, removeInterceptors } from "@services/login/ApiClient";
 import { setCachedToken } from "@services/TokenManager";
 import { searchLead, createLead } from "@services/ZohoCrm";
 import { saveFcmToken } from "@services/PushNotifications/PushNotifications";
-import messaging from "@react-native-firebase/messaging";
+import { getMessaging, onTokenRefresh } from "@react-native-firebase/messaging";
 import { clearAllUserData } from "../utils/userDataManager";
 
 interface AuthContextProps {
@@ -19,6 +19,7 @@ interface AuthContextProps {
   setLeadId: (id: string | null) => void;
   login: (loginemail: string, loginpassword: string) => Promise<AuthResponse>;
   Glogin: (loginemail: string) => Promise<AuthResponse>;
+  firebaseGlogin: (firebaseIdToken: string) => Promise<AuthResponse>;
   logout: () => void;
   forceLogout: () => void;
   clearAllUserData: () => Promise<void>;
@@ -33,11 +34,15 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   // Replace registerFcmToken with direct saveFcmToken calls
   useEffect(() => {
-    const unsubscribe = messaging().onTokenRefresh(async (newToken) => {
+    const unsubscribe = onTokenRefresh(getMessaging(), async (newToken) => {
       if (authData?.id) {
         console.log("🔄 FCM token refreshed:", newToken);
         // directly save refreshed token
-        await saveFcmToken(String(authData.id));
+        try {
+          await saveFcmToken(String(authData.id));
+        } catch (e) {
+          console.error("Failed to save refreshed FCM token", e);
+        }
       }
     });
     return unsubscribe;
@@ -59,7 +64,11 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       setLeadId(fetchedLeadId || null);
 
       // ✅ Save FCM token after login
-      await saveFcmToken(String(id));
+      try {
+        await saveFcmToken(String(id));
+      } catch (e) {
+        console.log("FCM token save skipped/failed during login", e);
+      }
     }
     return response;
   };
@@ -95,7 +104,36 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       setLeadId(fetchedLeadId);
 
       // ✅ Save FCM token after Google login
-      await saveFcmToken(String(id));
+      try {
+        await saveFcmToken(String(id));
+      } catch (e) {
+        console.log("FCM token save skipped/failed during Google login", e);
+      }
+    }
+    return response;
+  };
+
+  const firebaseGlogin = async (firebaseIdToken: string): Promise<AuthResponse> => {
+    const response = await handleFirebaseGoogleLogin(firebaseIdToken);
+    if (response.success && typeof response.data === "object") {
+      const { token, id } = response.data;
+      // Email isn't directly available from the token here; it will be stored empty.
+      // The Firebase user's email can be passed in from google.jsx if needed in the future.
+      const email = "";
+
+      await Keychain.setGenericPassword("user", JSON.stringify({ id, email }), { service: "userDetails" });
+      await Keychain.setGenericPassword("auth", token, { service: "authToken" });
+
+      setAuthData({ token, id, email });
+      setIsAuthenticated(true);
+      setCachedToken(token);
+
+      // ✅ Save FCM token after Firebase Google login
+      try {
+        await saveFcmToken(String(id));
+      } catch (e) {
+        console.log("FCM token save skipped/failed during Firebase Google login", e);
+      }
     }
     return response;
   };
@@ -179,7 +217,7 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, authData, login, Glogin, logout: showLogoutModal, leadId, setLeadId, setAuthData, forceLogout, clearAllUserData }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, authData, login, Glogin, firebaseGlogin, logout: showLogoutModal, leadId, setLeadId, setAuthData, forceLogout, clearAllUserData }}>
       {children}
       <LogoutModal visible={logoutModalVisible} onCancel={hideLogoutModal} onConfirm={handleLogout} />
     </AuthContext.Provider>

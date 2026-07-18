@@ -11,6 +11,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { AuthContext } from '@context/Authcontext';
 import { useLoginViewModel, useSignupViewModel } from '@viewmodel/Authviewmodel';
@@ -59,9 +60,7 @@ const LandingPage = () => {
     setSignUpErrors,
     setOtpReceived,
   } = useSignupViewModel();
-
-  const { signIn } = useGoogleSignIn();
-
+  const { signIn, isLoading } = useGoogleSignIn();
   // After registration, switch to login tab (don't auto-login)
   useEffect(() => {
     if (registration) {
@@ -127,12 +126,12 @@ const LandingPage = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       // keyboardVerticalOffset={30}
       // changed
-      style={[styles.container, { flex: 1 ,paddingBottom:15}]}>
+      style={[styles.container, { flex: 1, paddingBottom: 15 }]}>
       <View style={{ flex: 1 }}>
         {/* changed */}
         <View style={styles.header}>
-              <Image source={{ uri: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/bitlabs-skill-images/logo.png" }} style={styles.logo} />
-            </View>
+          <Image source={{ uri: "https://bitlabs-app.s3.ap-south-1.amazonaws.com/bitlabs-skill-images/logo.png" }} style={styles.logo} />
+        </View>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View style={styles.innercontainer}>
 
@@ -159,7 +158,7 @@ const LandingPage = () => {
                 {activeButton === 'signup' ? (
                   <LinearGradient
                     colors={['#F97316', '#FAA729']}
-                                        start={{ x: 0, y: 0 }}
+                    start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.gradientBackground}>
                     <Text style={[styles.buttonText, styles.activeButtonText]}>Sign Up</Text>
@@ -177,9 +176,9 @@ const LandingPage = () => {
             )}
             {activeButton === 'login' ? (
               <View style={styles.formContainer}>
-                <View style={{display: 'flex',flexDirection: 'row',  justifyContent: 'flex-end'}}>
-                                <Text style={{ color: 'red', marginTop  : 10,  marginRight: 30  }}>*</Text>
-                          </View>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+                  <Text style={{ color: 'red', marginTop: 10, marginRight: 30 }}>*</Text>
+                </View>
                 <TextInput
                   placeholder="Email"
                   placeholderTextColor="#B1B1B1"
@@ -196,11 +195,11 @@ const LandingPage = () => {
                     {loginErrors.username}
                   </Text>
                 )}
-                
 
-                
+
+
                 <View style={styles.passwordContainer}>
-                  
+
                   <TextInput
                     placeholder="Password"
                     placeholderTextColor="#B1B1B1"
@@ -385,29 +384,35 @@ const LandingPage = () => {
               <View style={styles.dividerContainer}>
                 <Text style={styles.dividerText}> or </Text>
               </View>
-              <TouchableOpacity style={styles.googleContainer} onPress={signIn}>
-                <Image
-                  source={require('../../assests/LandingPage/googlelogo.png')}
-                  style={styles.googlelogoStyle}
-                />
-                <Text style={styles.googleSignUp}>Continue with Google</Text>
+              <TouchableOpacity style={styles.googleContainer} onPress={signIn} disabled={isLoading}>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#0000ff" />
+                ) : (
+                  <>
+                    <Image
+                      source={require('../../assests/LandingPage/googlelogo.png')}
+                      style={styles.googlelogoStyle}
+                    />
+                    <Text style={styles.googleSignUp}>Continue with Google</Text>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
-        
-        <View style={styles.bottomContainer}>
-          <GradientButton
-            title={activeButton === 'login' ? 'Login' : otpReceived ? 'Verify OTP' : 'Send OTP'}
-            onPress={
-              activeButton === 'login'
-                ? validateAndLogin
-                : otpReceived
-                  ? handleOtp
-                  : validateAndSignup
-            }
-          />
-        </View>
-        </ScrollView> 
+
+          <View style={styles.bottomContainer}>
+            <GradientButton
+              title={activeButton === 'login' ? 'Login' : otpReceived ? 'Verify OTP' : 'Send OTP'}
+              onPress={
+                activeButton === 'login'
+                  ? validateAndLogin
+                  : otpReceived
+                    ? handleOtp
+                    : validateAndSignup
+              }
+            />
+          </View>
+        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );

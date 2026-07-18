@@ -19,6 +19,8 @@ export const setLogoutHandler = (logoutFn: () => void) => {
   logoutHandler = logoutFn;
 };
 
+console.log("[ApiClient] Initializing with API_BASE_URL:", API_BASE_URL);
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {

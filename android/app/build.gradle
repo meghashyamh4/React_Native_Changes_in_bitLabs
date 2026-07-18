@@ -2,7 +2,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-apply plugin: 'com.google.gms.google-services'
+// NOTE: 'com.google.gms.google-services' is applied at the BOTTOM of this file (after dependencies)
 
 
 
@@ -181,7 +181,7 @@ tasks.whenTaskAdded { task ->
 }
 
 dependencies {
-    // The version of react-native is set by the React Native Gradle Plugin
+    // React Native core
     implementation("com.facebook.react:react-android")
 
     if (hermesEnabled.toBoolean()) {
@@ -189,15 +189,20 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-}
-dependencies {
-    // For Google Sign-In
+
+    // Google Sign-In
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
+
+    // Firebase (BOM manages all Firebase library versions)
     implementation platform('com.google.firebase:firebase-bom:33.1.2')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging'
+
+    // Notifee (local notifications)
     implementation "app.notifee:core:6.0.0"
 }
+
 apply from:"../../node_modules/react-native-vector-icons/fonts.gradle"
 
+// ✅ google-services plugin MUST be applied after the dependencies block
 apply plugin: 'com.google.gms.google-services'
-
